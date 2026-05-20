@@ -1,0 +1,47 @@
+name: Update RSS Data
+
+on:
+  schedule:
+    # 每天 UTC 时间 0:00 运行 (北京时间 08:00)
+    - cron: '0 0 * * *'
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  update-rss:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Run RSS Parser
+        run: node rss-parser.js
+
+      - name: Check if episodes.json changed
+        id: check_changes
+        run: |
+          if git diff --quiet episodes.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "RSS Update Bot"
+          git add episodes.json
+          git commit -m "chore: update RSS data $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          git push
+
+      - name: No changes to commit
+        if: steps.check_changes.outputs.changed == 'false'
+        run: echo "✅ episodes.json 无更新"
