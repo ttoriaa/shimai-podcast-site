@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>时髦小姨 Podcast</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#home">时髦小姨</a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="index.html#home">首页</a>
+        <a href="episodes.html">节目</a>
+        <a href="about.html">主持人</a>
+        <a href="mailto:vvickey.lee@gmail.com">联系</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <span class="eyebrow">新一季上线</span>
+          <h1>时髦小姨：熵增世界做熵减</h1>
+          <p>是 00 后初入职场的时髦小姨，也在狠狠经历奥德赛：在巴厘岛和小猴斗智斗勇、在罗马听海鸥的声音寻找古迹与现代的链接、在波伏娃幕前沉思、在加州当过 homeless、在夏威夷种地做园艺，以及各种待解锁形态……</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="episodes.html">立即收听</a>
+            <a class="btn btn-secondary" href="about.html">认识小姨</a>
+          </div>
+        </div>
+        <div class="hero-media">
+          <div class="hero-photos" style="display:flex; gap:12px;">
+            <img src="images/photo1.jpg" alt="Vickie photo 1" style="width:33%; height:auto; object-fit:cover; border-radius:8px;" />
+            <img src="images/photo2.jpg" alt="Vickie photo 2" style="width:33%; height:auto; object-fit:cover; border-radius:8px;" />
+            <img src="images/photo3.jpg" alt="Vickie photo 3" style="width:33%; height:auto; object-fit:cover; border-radius:8px;" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-light" id="episodes">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">热门节目</span>
+          <h2>时髦小姨的精选播客</h2>
+          <p>每一集都有一句你会记住的生活提醒。跟着小姨，从衣柜到心情，都升级一点。</p>
+        </div>
+        <div class="episode-filters" id="episodeFilters">
+          <button class="filter-btn active" data-category="all">全部</button>
+          <button class="filter-btn" data-category="穿搭">穿搭</button>
+          <button class="filter-btn" data-category="美妆">美妆</button>
+          <button class="filter-btn" data-category="情感">情感</button>
+          <button class="filter-btn" data-category="生活">生活</button>
+        </div>
+        <div class="episode-grid" id="episodeGrid"></div>
+      </div>
+    </section>
+
+    <section class="section section-card" id="about">
+      <div class="container about-grid">
+        <div class="about-media"></div>
+        <div class="about-copy">
+          <span class="eyebrow">主持人介绍</span>
+          <h2>你好，我是时髦小姨 Vickie</h2>
+          <p>节目的初衷：在熵增世界做熵减。作为 00 后初入职场的时髦小姨，我在城市与旅途中不断探索：从巴厘岛的小猴冒险、罗马听海鸥的古迹漫步，到夏威夷的园艺时光与奥德赛时期的自我探索。这里用平实的故事和可执行的建议，陪你在忙乱中找到一点秩序与温柔。</p>
+          <ul class="about-list">
+            <li>女性主义｜一间属于自己的房间、波伏娃、上野千鹤子、伍尔夫...</li>
+            <li>何以丰荣｜城市切片、罗马在停留、巴黎在流动...</li>
+            <li>个人成长｜熵增世界做熵减...</li>
+          </ul>
+          <div class="about-note">
+            “在熵增世界做熵减。”
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-cta">
+      <div class="container cta-card">
+        <div>
+          <h2>订阅小姨的每一集</h2>
+          <p>连载内容会优先推送给你：独家穿搭锦囊、妆容清单、情感开解与城市生活灵感。</p>
+        </div>
+        <a class="btn btn-primary" href="#contact">立即订阅</a>
+      </div>
+    </section>
+
+    <section class="section section-light" id="contact">
+      <div class="container contact-grid">
+        <div>
+          <span class="eyebrow">联系我们</span>
+          <h2>有话想说？欢迎来信</h2>
+          <p>如果你想推荐话题、分享听后感，或者想和小姨一起做一集特别专辑，发邮件或扫码关注小姨社交。</p>
+          <div class="contact-details">
+            <p><strong>邮箱：</strong>vvickey.lee@gmail.com</p>
+            <p><strong>Instagram：</strong>@vikki.7ee</p>
+          </div>
+        </div>
+        <form class="contact-form" id="contactForm">
+          <label>
+            你的名字
+            <input type="text" name="name" placeholder="E.G. Jackie..." required />
+          </label>
+          <label>
+            你的邮件
+            <input type="email" name="email" placeholder="example@mail.com" required />
+          </label>
+          <label>
+            想聊的话题
+            <textarea name="message" rows="4" placeholder="我想听穿搭/情感/周末生活..." required></textarea>
+          </label>
+          <button class="btn btn-primary" type="submit">发送消息</button>
+          <p class="form-note" id="formNote"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© 2026 时髦小姨 Podcast · 熵增世界做熵减</p>
+    </div>
+  </footer>
+
+  <div class="modal" id="previewModal" aria-hidden="true">
+    <div class="modal-content">
+      <button class="modal-close" id="modalCloseBtn" aria-label="关闭预览">×</button>
+      <h3>最新一期预览</h3>
+      <p>小姨带你读一次职场穿搭清单，9分钟轻松入门。</p>
+      <audio controls id="previewAudio">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
+        你的浏览器不支持音频播放。
+      </audio>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>节目 · 时髦小姨</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html#home">时髦小姨</a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="index.html#home">首页</a>
+        <a href="episodes.html">节目</a>
+        <a href="about.html">主持人</a>
+        <a href="mailto:vvickey.lee@gmail.com">联系</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="section section-light">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">全部节目</span>
+          <h2>按主题浏览每一集</h2>
+          <p>点击任意一集进入单集页面，收听、收藏或分享给朋友。</p>
+        </div>
+
+        <div class="episode-filters" id="episodeFilters">
+          <button class="filter-btn active" data-category="all">全部</button>
+          <button class="filter-btn" data-category="个人成长">个人成长</button>
+          <button class="filter-btn" data-category="何以丰荣｜城市切片">何以丰荣｜城市切片</button>
+          <button class="filter-btn" data-category="对谈Talk">对谈Talk</button>
+        </div>
+
+        <div class="episode-grid" id="episodeGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© 2026 时髦小姨 Podcast</p>
+    </div>
+  </footer>
+
+  <script src="episodes.js"></script>
+</body>
+</html>
