@@ -1,0 +1,18 @@
+{
+  "name": "shimai-podcast-site",
+  "version": "1.0.0",
+  "description": "时髦小姨 Podcast 静态站点 + vikipedia assistant demo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "update-rss": "node rss-parser.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "openai": "^4.8.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

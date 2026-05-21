@@ -95,6 +95,68 @@ function setupContactForm() {
   });
 }
 
+function createAssistantMessage(text, variant = 'assistant') {
+  const message = document.createElement('div');
+  message.className = `assistant-message ${variant}`;
+  message.textContent = text;
+  return message;
+}
+
+function setupAssistant() {
+  const assistantForm = document.querySelector('#assistantForm');
+  const assistantInput = document.querySelector('#assistantInput');
+  const assistantMessages = document.querySelector('#assistantMessages');
+  const quickButtons = document.querySelectorAll('.assistant-quick-btn');
+
+  if (!assistantForm || !assistantInput || !assistantMessages) return;
+
+  async function sendAssistantQuery(question) {
+    const trimmed = question.trim();
+    if (!trimmed) return;
+    assistantMessages.appendChild(createAssistantMessage(trimmed, 'assistant-user'));
+    assistantInput.value = '';
+    const loadingMessage = createAssistantMessage('正在为你整理答案...', 'assistant-loading');
+    assistantMessages.appendChild(loadingMessage);
+    assistantMessages.scrollTop = assistantMessages.scrollHeight;
+
+    try {
+      const response = await fetch('/api/assistant/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: trimmed }),
+      });
+      const payload = await response.json();
+      loadingMessage.remove();
+
+      if (response.ok && payload && payload.answer) {
+        assistantMessages.appendChild(createAssistantMessage(payload.answer, 'assistant'));
+      } else if (payload && payload.error) {
+        assistantMessages.appendChild(createAssistantMessage(payload.error, 'assistant-error'));
+      } else {
+        assistantMessages.appendChild(createAssistantMessage('抱歉，助手暂时无法响应，请稍后再试。', 'assistant-error'));
+      }
+    } catch (error) {
+      loadingMessage.remove();
+      assistantMessages.appendChild(createAssistantMessage('网络请求失败，请检查后端服务是否已启动。', 'assistant-error'));
+    } finally {
+      assistantMessages.scrollTop = assistantMessages.scrollHeight;
+    }
+  }
+
+  assistantForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    sendAssistantQuery(assistantInput.value);
+  });
+
+  quickButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const preset = button.textContent.trim();
+      assistantInput.value = preset;
+      sendAssistantQuery(preset);
+    });
+  });
+}
+
 (async function init() {
   const episodes = await fetchEpisodes();
   const episodeGrid = document.querySelector('#episodeGrid');
@@ -105,4 +167,5 @@ function setupContactForm() {
   setupFilters(episodes);
   setupPreviewModal();
   setupContactForm();
+  setupAssistant();
 })();

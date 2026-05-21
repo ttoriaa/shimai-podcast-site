@@ -6,6 +6,8 @@
 运行以下命令从 RSS 源获取最新的节目数据:
 
 ```bash
+npm run update-rss
+# 或者直接运行
 node rss-parser.js
 ```
 

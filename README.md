@@ -14,9 +14,30 @@
 
 ```bash
 cd shimai-podcast-site
-# 在 macOS / Linux 上运行本地静态服务器
-python3 -m http.server 8000
-# 然后在浏览器打开 http://localhost:8000
+# 安装后端依赖
+npm install
+# 运行 Node + 静态站点 demo
+npm start
+# 然后在浏览器打开 http://localhost:3000
 ```
+
+如果你希望启用 OpenAI 模型，请先设置环境变量：
+
+```bash
+export OPENAI_API_KEY=your_api_key_here
+npm start
+```
+
+这样就能在首页看到“AI 智能助手”版块，支持播客 overview、话题建议和最新总结。
+
+## RSS 更新
+
+你也可以直接通过 npm 命令更新 RSS 数据：
+
+```bash
+npm run update-rss
+```
+
+该命令会从 RSS 源抓取最新节目并同步写入 `episodes.json`。
 
 如需我帮你：生成更多集数、添加 RSS、或者打包为小程序/React 站点。
