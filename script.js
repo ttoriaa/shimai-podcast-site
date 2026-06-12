@@ -1,3 +1,5 @@
+const API_BASE = window.__API_BASE__ || '';
+
 async function fetchEpisodes() {
   try {
     const res = await fetch('episodes.json');
@@ -145,7 +147,7 @@ function setupAssistant() {
     assistantMessages.scrollTop = assistantMessages.scrollHeight;
 
     try {
-      const response = await fetch('/api/assistant/query', {
+      const response = await fetch(`${API_BASE}/api/assistant/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: trimmed })
