@@ -3,6 +3,37 @@
   const PAGE_CONTEXT = window.__ASSISTANT_CONTEXT__ || "当前页面";
   const STORAGE_KEY = "vickie_assistant_widget_state";
 
+  function ensureStyles() {
+    if (document.getElementById("assistant-widget-style")) return;
+    const style = document.createElement("style");
+    style.id = "assistant-widget-style";
+    style.textContent = [
+      ".assistant-widget{position:fixed;right:22px;bottom:22px;z-index:60;font-family:inherit;}",
+      ".assistant-widget-launcher{border:none;border-radius:999px;background:var(--accent-dark,#1a7a86);color:#fff;padding:12px 18px;font-weight:700;cursor:pointer;box-shadow:0 16px 30px rgba(26,122,134,.25);}",
+      ".assistant-widget-panel{width:min(420px,calc(100vw - 28px));border-radius:24px;background:linear-gradient(180deg,#fff 0%,#eaf6f8 100%);border:1px solid rgba(44,168,181,.25);box-shadow:0 20px 60px rgba(26,122,134,.08);overflow:hidden;}",
+      ".assistant-widget-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(44,168,181,.2);}",
+      ".assistant-widget-header p{margin:4px 0 0;color:var(--muted,#6b95a0);font-size:.85rem;}",
+      ".assistant-widget-actions{display:flex;gap:8px;}",
+      ".assistant-widget-actions button{width:30px;height:30px;border-radius:999px;border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);cursor:pointer;}",
+      ".assistant-widget-body{padding:14px;display:flex;flex-direction:column;gap:12px;}",
+      ".assistant-widget-quick{display:flex;flex-wrap:wrap;gap:8px;}",
+      ".assistant-widget-quick .assistant-quick-btn{border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:8px 12px;border-radius:999px;cursor:pointer;}",
+      ".assistant-widget-quick .assistant-quick-btn:hover{background:var(--accent,#2ca8b5);color:#fff;}",
+      ".assistant-widget-messages{min-height:180px;max-height:280px;overflow-y:auto;padding:12px;border-radius:16px;background:#fff;border:1px solid rgba(44,168,181,.14);}",
+      ".assistant-widget-form{display:flex;flex-direction:column;gap:10px;}",
+      ".assistant-widget-form textarea{width:100%;min-height:90px;border-radius:12px;border:1px solid rgba(44,168,181,.2);padding:10px 12px;resize:vertical;}",
+      ".assistant-widget-form button{align-self:flex-end;border:none;border-radius:999px;background:var(--accent,#2ca8b5);color:#fff;padding:10px 18px;font-weight:700;cursor:pointer;}",
+      ".assistant-widget .assistant-message{margin-bottom:10px;padding:12px;border-radius:12px;background:#f8ffff;line-height:1.55;}",
+      ".assistant-widget .assistant-user{text-align:right;background:rgba(44,168,181,.12);}",
+      ".assistant-widget .assistant-loading{font-style:italic;color:var(--muted,#6b95a0);}",
+      ".assistant-widget .assistant-error{background:#ffe8e8;color:#9f2b2b;}",
+      ".assistant-widget.is-closed .assistant-widget-panel{display:none;}",
+      ".assistant-widget:not(.is-closed) .assistant-widget-launcher{display:none;}",
+      "@media (max-width:700px){.assistant-widget{right:10px;left:10px;bottom:10px;}.assistant-widget-panel{width:auto;}}"
+    ].join("");
+    document.head.appendChild(style);
+  }
+
   function loadState() {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -44,17 +75,17 @@
       "    </div>",
       "  </header>",
       '  <div class="assistant-widget-body">',
-      '    <div class="assistant-quick assistant-widget-quick">',
+      '    <div class="assistant-widget-quick">',
       '      <button type="button" class="assistant-quick-btn">整体 overview</button>',
       '      <button type="button" class="assistant-quick-btn">新话题建议</button>',
       '      <button type="button" class="assistant-quick-btn">解析 RSS 文本</button>',
       "    </div>",
-      '    <div class="assistant-messages assistant-widget-messages">',
-      '      <div class="assistant-message assistant-welcome">你好，我是时髦小姨的 AI 助手。你可以问我当前页面相关问题。</div>',
+      '    <div class="assistant-widget-messages">',
+      '      <div class="assistant-message">你好，我是时髦小姨的 AI 助手。你可以问我当前页面相关问题。</div>',
       "    </div>",
-      '    <form class="assistant-form assistant-widget-form">',
+      '    <form class="assistant-widget-form">',
       '      <textarea rows="3" placeholder="例如：结合当前页面，给我 3 个深一点的话题" required></textarea>',
-      '      <button class="btn btn-primary" type="submit">发送</button>',
+      '      <button type="submit">发送</button>',
       "    </form>",
       "  </div>",
       "</section>"
@@ -74,7 +105,6 @@
     const input = root.querySelector("textarea");
     const messages = root.querySelector(".assistant-widget-messages");
     const quickButtons = root.querySelectorAll(".assistant-widget-quick .assistant-quick-btn");
-
     const state = loadState();
 
     function syncUI() {
@@ -158,13 +188,16 @@
     syncUI();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      const root = createWidget();
-      attachHandlers(root);
-    });
-  } else {
+  function mount() {
+    if (document.querySelector(".assistant-widget")) return;
+    ensureStyles();
     const root = createWidget();
     attachHandlers(root);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mount);
+  } else {
+    mount();
   }
 })();
