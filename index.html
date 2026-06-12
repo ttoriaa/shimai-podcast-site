@@ -44,9 +44,9 @@
     <section class="section section-card" id="assistant">
       <div class="container assistant-card">
         <div class="assistant-copy">
-          <span class="eyebrow">AI 智能助手</span>
-          <h2>问小姨：播客概览、选题建议、最新总结</h2>
-          <p>这个 demo 已接入前端 + Node 后端。你可以直接询问“给我一个整体 overview”、“帮我想新的播客话题”，或者“总结最新一集内容”。</p>
+          <span class="eyebrow">Assistant Jackie</span>
+          <h2>问问Jackie</h2>
+          <p> Jackie是我的小猫，我不在家，他会回答你的~ </p>
           <div class="assistant-quick">
             <button type="button" class="assistant-quick-btn">话题全览</button>
             <button type="button" class="assistant-quick-btn">选题灵感</button>
@@ -55,11 +55,11 @@
         </div>
         <div class="assistant-panel">
           <div class="assistant-messages" id="assistantMessages">
-            <div class="assistant-message assistant-welcome">你好，我是时髦小姨的 AI 助手。问我播客风格、话题建议，或最新一集总结吧。</div>
+            <div class="assistant-message assistant-welcome">你好，我是Jackie~ </div>
           </div>
           <form class="assistant-form" id="assistantForm">
             <textarea id="assistantInput" rows="3" placeholder="例如：给我一个新的播客话题建议..." required></textarea>
-            <button class="btn btn-primary" id="assistantSubmitBtn" type="submit">问小姨</button>
+            <button class="btn btn-primary" id="assistantSubmitBtn" type="submit">Jackie</button>
           </form>
           <p class="assistant-hint">如果你启用了 <code>OPENAI_API_KEY</code>，后端会优先调用 OpenAI，否则将返回本地 demo 结果。</p>
         </div>
