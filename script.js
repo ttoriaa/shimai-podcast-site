@@ -38,25 +38,31 @@ function renderEpisodeGrid(list, container) {
 function renderHeroEpisodes(list, root, count = 3) {
   if (!root) return;
   const subset = list.slice(0, count);
-  root.innerHTML = subset.map(ep => `
-    <div class="hero-ep">
-      <a href="episode.html?id=${ep.id}">${ep.title}</a>
-      <div class="meta">${ep.date || ''} · ${ep.duration || ''}</div>
-    </div>
-  `).join('');
+  root.innerHTML = subset
+    .map(
+      (ep) => `
+      <div class="hero-ep">
+        <a href="episode.html?id=${ep.id}">${ep.title}</a>
+        <div class="meta">${ep.date || ''} · ${ep.duration || ''}</div>
+      </div>
+    `
+    )
+    .join('');
 }
 
 function setupFilters(episodes) {
   const filterButtons = document.querySelectorAll('.filter-btn');
   const episodeGrid = document.querySelector('#episodeGrid');
   if (!episodeGrid) return;
+
   function applyFilter(category) {
     if (category === 'all') renderEpisodeGrid(episodes, episodeGrid);
-    else renderEpisodeGrid(episodes.filter(e => e.category === category), episodeGrid);
+    else renderEpisodeGrid(episodes.filter((e) => e.category === category), episodeGrid);
   }
+
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      filterButtons.forEach(b => b.classList.remove('active'));
+      filterButtons.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       applyFilter(btn.dataset.category);
     });
@@ -67,15 +73,19 @@ function setupPreviewModal() {
   const heroPlayBtn = document.querySelector('#heroPlayBtn');
   const previewModal = document.querySelector('#previewModal');
   const modalCloseBtn = document.querySelector('#modalCloseBtn');
+
   if (!heroPlayBtn || !previewModal || !modalCloseBtn) return;
+
   heroPlayBtn.addEventListener('click', () => {
     previewModal.classList.add('open');
     previewModal.setAttribute('aria-hidden', 'false');
   });
+
   modalCloseBtn.addEventListener('click', () => {
     previewModal.classList.remove('open');
     previewModal.setAttribute('aria-hidden', 'true');
   });
+
   previewModal.addEventListener('click', (event) => {
     if (event.target === previewModal) {
       previewModal.classList.remove('open');
@@ -87,7 +97,9 @@ function setupPreviewModal() {
 function setupContactForm() {
   const contactForm = document.querySelector('#contactForm');
   const formNote = document.querySelector('#formNote');
+
   if (!contactForm) return;
+
   contactForm.addEventListener('submit', (event) => {
     event.preventDefault();
     if (formNote) formNote.textContent = '感谢你的留言，Vickie 会尽快回复你！';
@@ -106,15 +118,28 @@ function setupAssistant() {
   const assistantForm = document.querySelector('#assistantForm');
   const assistantInput = document.querySelector('#assistantInput');
   const assistantMessages = document.querySelector('#assistantMessages');
-  const quickButtons = document.querySelectorAll('.assistant-quick-btn');
+  const quickContainer = document.querySelector('.assistant-quick');
 
   if (!assistantForm || !assistantInput || !assistantMessages) return;
+
+  if (quickContainer && !quickContainer.querySelector('[data-rss-helper="1"]')) {
+    const rssButton = document.createElement('button');
+    rssButton.type = 'button';
+    rssButton.className = 'assistant-quick-btn';
+    rssButton.dataset.rssHelper = '1';
+    rssButton.textContent = '解析 RSS 文本';
+    quickContainer.appendChild(rssButton);
+  }
+
+  const quickButtons = document.querySelectorAll('.assistant-quick-btn');
 
   async function sendAssistantQuery(question) {
     const trimmed = question.trim();
     if (!trimmed) return;
+
     assistantMessages.appendChild(createAssistantMessage(trimmed, 'assistant-user'));
     assistantInput.value = '';
+
     const loadingMessage = createAssistantMessage('正在为你整理答案...', 'assistant-loading');
     assistantMessages.appendChild(loadingMessage);
     assistantMessages.scrollTop = assistantMessages.scrollHeight;
@@ -123,7 +148,7 @@ function setupAssistant() {
       const response = await fetch('/api/assistant/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: trimmed }),
+        body: JSON.stringify({ query: trimmed })
       });
       const payload = await response.json();
       loadingMessage.remove();
@@ -143,6 +168,8 @@ function setupAssistant() {
     }
   }
 
+  assistantInput.placeholder = '例如：解析一下 RSS 文本内容，并给我关键词';
+
   assistantForm.addEventListener('submit', (event) => {
     event.preventDefault();
     sendAssistantQuery(assistantInput.value);
@@ -159,11 +186,13 @@ function setupAssistant() {
 
 (async function init() {
   const episodes = await fetchEpisodes();
+
   const episodeGrid = document.querySelector('#episodeGrid');
   const heroEpisodesRoot = document.querySelector('#heroEpisodes');
 
   if (episodeGrid) renderEpisodeGrid(episodes, episodeGrid);
   if (heroEpisodesRoot) renderHeroEpisodes(episodes, heroEpisodesRoot, 3);
+
   setupFilters(episodes);
   setupPreviewModal();
   setupContactForm();
