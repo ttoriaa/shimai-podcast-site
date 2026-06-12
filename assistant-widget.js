@@ -2,6 +2,11 @@
   const API_BASE = window.__API_BASE__ || "https://shimai-podcast-site.onrender.com";
   const PAGE_CONTEXT = window.__ASSISTANT_CONTEXT__ || "当前页面";
   const STORAGE_KEY = "vickie_assistant_widget_state";
+  const PRESET_QUERY_MAP = {
+    "一个介绍": "给我一个整体 overview",
+    "一些新话题": "帮我想新的播客话题",
+    "最近在聊什么": "总结最新一集内容"
+  };
 
   function ensureStyles() {
     if (document.getElementById("assistant-widget-style")) return;
@@ -51,6 +56,11 @@
     }
   }
 
+  function mapPresetToQuery(preset) {
+    const label = String(preset || "").trim();
+    return PRESET_QUERY_MAP[label] || label;
+  }
+
   function createMessage(text, variant) {
     const node = document.createElement("div");
     node.className = "assistant-message " + (variant || "assistant");
@@ -62,11 +72,11 @@
     const root = document.createElement("div");
     root.className = "assistant-widget";
     root.innerHTML = [
-      '<button type="button" class="assistant-widget-launcher" aria-label="打开 AI 助手">问小姨</button>',
-      '<section class="assistant-widget-panel" aria-label="AI 助手聊天窗口">',
+      '<button type="button" class="assistant-widget-launcher" aria-label="打开 AI Assistant Jackie">AI Assistant Jackie</button>',
+      '<section class="assistant-widget-panel" aria-label="AI Assistant Jackie 聊天窗口">',
       '  <header class="assistant-widget-header">',
       '    <div>',
-      '      <strong>AI 助手</strong>',
+      '      <strong>AI Assistant Jackie</strong>',
       '      <p>当前：' + PAGE_CONTEXT + '</p>',
       "    </div>",
       '    <div class="assistant-widget-actions">',
@@ -76,12 +86,12 @@
       "  </header>",
       '  <div class="assistant-widget-body">',
       '    <div class="assistant-widget-quick">',
-      '      <button type="button" class="assistant-quick-btn">整体 overview</button>',
-      '      <button type="button" class="assistant-quick-btn">新话题建议</button>',
-      '      <button type="button" class="assistant-quick-btn">解析 RSS 文本</button>',
+      '      <button type="button" class="assistant-quick-btn">一个介绍</button>',
+      '      <button type="button" class="assistant-quick-btn">一些新话题</button>',
+      '      <button type="button" class="assistant-quick-btn">最近在聊什么</button>',
       "    </div>",
       '    <div class="assistant-widget-messages">',
-      '      <div class="assistant-message">你好，我是时髦小姨的 AI 助手。你可以问我当前页面相关问题。</div>',
+      '      <div class="assistant-message">你好，我是 AI Assistant Jackie。你可以问我当前页面相关问题。</div>',
       "    </div>",
       '    <form class="assistant-widget-form">',
       '      <textarea rows="3" placeholder="例如：结合当前页面，给我 3 个深一点的话题" required></textarea>',
@@ -117,11 +127,12 @@
       launcher.style.display = state.closed ? "inline-flex" : "none";
     }
 
-    async function sendQuestion(rawQuestion) {
+    async function sendQuestion(rawQuestion, userDisplayQuestion) {
       const question = String(rawQuestion || "").trim();
       if (!question) return;
 
-      messages.appendChild(createMessage(question, "assistant-user"));
+      const visibleQuestion = String(userDisplayQuestion || question).trim() || question;
+      messages.appendChild(createMessage(visibleQuestion, "assistant-user"));
       messages.scrollTop = messages.scrollHeight;
       input.value = "";
 
@@ -137,6 +148,7 @@
           body: JSON.stringify({ query: contextualQuery })
         });
         const payload = await response.json();
+
         loading.remove();
 
         if (response.ok && payload && payload.answer) {
@@ -179,9 +191,10 @@
 
     quickButtons.forEach(function (button) {
       button.addEventListener("click", function () {
-        const preset = button.textContent || "";
+        const preset = String(button.textContent || "").trim();
+        const mappedQuery = mapPresetToQuery(preset);
         input.value = preset;
-        sendQuestion(preset);
+        sendQuestion(mappedQuery, preset);
       });
     });
 
