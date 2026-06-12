@@ -1,5 +1,11 @@
 const API_BASE = window.__API_BASE__ || '';
 
+const PRESET_QUERY_MAP = {
+  '一个介绍': '给我一个整体 overview',
+  '一些新话题': '帮我想新的播客话题',
+  '最近在聊什么': '总结最新一集内容'
+};
+
 async function fetchEpisodes() {
   try {
     const res = await fetch('episodes.json');
@@ -58,8 +64,11 @@ function setupFilters(episodes) {
   if (!episodeGrid) return;
 
   function applyFilter(category) {
-    if (category === 'all') renderEpisodeGrid(episodes, episodeGrid);
-    else renderEpisodeGrid(episodes.filter((e) => e.category === category), episodeGrid);
+    if (category === 'all') {
+      renderEpisodeGrid(episodes, episodeGrid);
+    } else {
+      renderEpisodeGrid(episodes.filter((e) => e.category === category), episodeGrid);
+    }
   }
 
   filterButtons.forEach((btn) => {
@@ -116,30 +125,26 @@ function createAssistantMessage(text, variant = 'assistant') {
   return message;
 }
 
+function mapPresetToQuery(preset) {
+  const label = (preset || '').trim();
+  return PRESET_QUERY_MAP[label] || label;
+}
+
 function setupAssistant() {
   const assistantForm = document.querySelector('#assistantForm');
   const assistantInput = document.querySelector('#assistantInput');
   const assistantMessages = document.querySelector('#assistantMessages');
-  const quickContainer = document.querySelector('.assistant-quick');
 
   if (!assistantForm || !assistantInput || !assistantMessages) return;
 
-  if (quickContainer && !quickContainer.querySelector('[data-rss-helper="1"]')) {
-    const rssButton = document.createElement('button');
-    rssButton.type = 'button';
-    rssButton.className = 'assistant-quick-btn';
-    rssButton.dataset.rssHelper = '1';
-    rssButton.textContent = '解析 RSS 文本';
-    quickContainer.appendChild(rssButton);
-  }
-
   const quickButtons = document.querySelectorAll('.assistant-quick-btn');
 
-  async function sendAssistantQuery(question) {
-    const trimmed = question.trim();
+  async function sendAssistantQuery(question, displayQuestion) {
+    const trimmed = (question || '').trim();
     if (!trimmed) return;
 
-    assistantMessages.appendChild(createAssistantMessage(trimmed, 'assistant-user'));
+    const visibleQuestion = (displayQuestion || trimmed).trim() || trimmed;
+    assistantMessages.appendChild(createAssistantMessage(visibleQuestion, 'assistant-user'));
     assistantInput.value = '';
 
     const loadingMessage = createAssistantMessage('正在为你整理答案...', 'assistant-loading');
@@ -170,7 +175,7 @@ function setupAssistant() {
     }
   }
 
-  assistantInput.placeholder = '例如：解析一下 RSS 文本内容，并给我关键词';
+  assistantInput.placeholder = '例如：一个介绍 / 一些新话题 / 最近在聊什么';
 
   assistantForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -180,8 +185,9 @@ function setupAssistant() {
   quickButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const preset = button.textContent.trim();
+      const mapped = mapPresetToQuery(preset);
       assistantInput.value = preset;
-      sendAssistantQuery(preset);
+      sendAssistantQuery(mapped, preset);
     });
   });
 }
