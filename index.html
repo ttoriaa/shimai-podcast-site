@@ -44,18 +44,18 @@
     <section class="section section-card" id="assistant">
       <div class="container assistant-card">
         <div class="assistant-copy">
-          <span class="eyebrow">AI 智能助手</span>
-          <h2>问小姨：播客概览、选题建议、最新总结</h2>
-          <p>这个 demo 已接入前端 + Node 后端。你可以直接询问“给我一个整体 overview”、“帮我想新的播客话题”，或者“总结最新一集内容”。</p>
+          <span class="eyebrow">AI Assistant Jackie</span>
+          <h2>AI Assistant Jackie</h2>
+          <p>尝试问问下面的~</p>
           <div class="assistant-quick">
-            <button type="button" class="assistant-quick-btn">整体 overview</button>
-            <button type="button" class="assistant-quick-btn">新话题建议</button>
-            <button type="button" class="assistant-quick-btn">最新一集总结</button>
+            <button type="button" class="assistant-quick-btn">一个介绍</button>
+            <button type="button" class="assistant-quick-btn">一些新话题</button>
+            <button type="button" class="assistant-quick-btn">最近在聊什么</button>
           </div>
         </div>
         <div class="assistant-panel">
           <div class="assistant-messages" id="assistantMessages">
-            <div class="assistant-message assistant-welcome">你好，我是时髦小姨的 AI 助手。问我播客风格、话题建议，或新集总结吧。</div>
+            <div class="assistant-message assistant-welcome">你好，我是 AI Assistant Jackie。问我播客风格、话题建议，或最近在聊什么吧。</div>
           </div>
           <form class="assistant-form" id="assistantForm">
             <textarea id="assistantInput" rows="3" placeholder="例如：给我一个新的播客话题建议..." required></textarea>
@@ -123,9 +123,18 @@
           </div>
         </div>
         <form class="contact-form" id="contactForm">
-          <label>你的名字<input type="text" name="name" placeholder="E.G. Jackie..." required /></label>
-          <label>你的邮件<input type="email" name="email" placeholder="example@mail.com" required /></label>
-          <label>想聊的话题<textarea name="message" rows="4" placeholder="我想听穿搭/情感/周末生活..." required></textarea></label>
+          <label>
+            你的名字
+            <input type="text" name="name" placeholder="E.G. Jackie..." required />
+          </label>
+          <label>
+            你的邮件
+            <input type="email" name="email" placeholder="example@mail.com" required />
+          </label>
+          <label>
+            想聊的话题
+            <textarea name="message" rows="4" placeholder="我想听穿搭/情感/周末生活..." required></textarea>
+          </label>
           <button class="btn btn-primary" type="submit">发送消息</button>
           <p class="form-note" id="formNote"></p>
         </form>
