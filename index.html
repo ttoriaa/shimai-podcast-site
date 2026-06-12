@@ -55,9 +55,7 @@
         </div>
         <div class="assistant-panel">
           <div class="assistant-messages" id="assistantMessages">
-            <div class="assistant-message assistant-welcome">
-              你好，我是时髦小姨的 AI 助手。问我播客风格、话题建议，或新集总结吧。
-            </div>
+            <div class="assistant-message assistant-welcome">你好，我是时髦小姨的 AI 助手。问我播客风格、话题建议，或新集总结吧。</div>
           </div>
           <form class="assistant-form" id="assistantForm">
             <textarea id="assistantInput" rows="3" placeholder="例如：给我一个新的播客话题建议..." required></textarea>
@@ -98,9 +96,7 @@
             <li>何以丰荣｜城市切片、罗马在停留、巴黎在流动...</li>
             <li>个人成长｜熵增世界做熵减...</li>
           </ul>
-          <div class="about-note">
-            “在熵增世界做熵减。”
-          </div>
+          <div class="about-note">“在熵增世界做熵减。”</div>
         </div>
       </div>
     </section>
@@ -127,18 +123,9 @@
           </div>
         </div>
         <form class="contact-form" id="contactForm">
-          <label>
-            你的名字
-            <input type="text" name="name" placeholder="E.G. Jackie..." required />
-          </label>
-          <label>
-            你的邮件
-            <input type="email" name="email" placeholder="example@mail.com" required />
-          </label>
-          <label>
-            想聊的话题
-            <textarea name="message" rows="4" placeholder="我想听穿搭/情感/周末生活..." required></textarea>
-          </label>
+          <label>你的名字<input type="text" name="name" placeholder="E.G. Jackie..." required /></label>
+          <label>你的邮件<input type="email" name="email" placeholder="example@mail.com" required /></label>
+          <label>想聊的话题<textarea name="message" rows="4" placeholder="我想听穿搭/情感/周末生活..." required></textarea></label>
           <button class="btn btn-primary" type="submit">发送消息</button>
           <p class="form-note" id="formNote"></p>
         </form>
@@ -166,7 +153,9 @@
 
   <script>
     window.__API_BASE__ = 'https://shimai-podcast-site.onrender.com';
+    window.__ASSISTANT_CONTEXT__ = '首页';
   </script>
   <script src="script.js"></script>
+  <script src="assistant-widget.js"></script>
 </body>
 </html>
