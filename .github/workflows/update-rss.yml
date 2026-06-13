@@ -40,6 +40,64 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Write update summary
+        if: always()
+        env:
+          CHANGED: ${{ steps.check_changes.outputs.changed || 'false' }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const { execSync } = require('child_process');
+
+          function readJson(filePath, fallback) {
+            try {
+              return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+            } catch {
+              return fallback;
+            }
+          }
+
+          const changed = process.env.CHANGED === 'true';
+          const after = readJson('episodes.json', []);
+          let before = [];
+
+          if (changed) {
+            try {
+              before = JSON.parse(execSync('git show HEAD:episodes.json', { encoding: 'utf-8' }));
+            } catch {
+              before = [];
+            }
+          }
+
+          const keyOf = (ep) => ep.guid || ep.audio || ep.title;
+          const beforeSet = new Set((before || []).map(keyOf));
+          const added = changed ? after.filter((ep) => !beforeSet.has(keyOf(ep))) : [];
+
+          const lines = [];
+          lines.push('## RSS 更新结果');
+          lines.push('');
+          lines.push('- 检测到变更: ' + (changed ? '是' : '否'));
+          lines.push('- 当前总集数: ' + after.length);
+
+          if (changed) {
+            lines.push('- 新增集数: ' + added.length);
+            lines.push('');
+            lines.push('### 新增 episode 列表');
+            lines.push('');
+            if (added.length > 0) {
+              for (const ep of added) {
+                lines.push('- ' + (ep.date || '未知日期') + ' | ' + (ep.title || '无标题') + ' | ' + (ep.category || '未分类'));
+              }
+            } else {
+              lines.push('未检测到新增条目（可能仅有字段更新或顺序变化）。');
+            }
+          } else {
+            lines.push('- 本次无新增 episode');
+          }
+
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          NODE
+
       - name: Commit and push changes
         if: steps.check_changes.outputs.changed == 'true'
         run: |
@@ -52,3 +110,30 @@ jobs:
       - name: No changes to commit
         if: steps.check_changes.outputs.changed == 'false'
         run: echo "✅ episodes.json 无更新"
+      - name: Send failure email alert
+        if: failure() && secrets.SMTP_SERVER != '' && secrets.ALERT_EMAIL_TO != ''
+        uses: dawidd6/action-send-mail@v6
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT || '587' }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[ALERT] RSS 更新失败 - ${{ github.repository }}"
+          to: ${{ secrets.ALERT_EMAIL_TO }}
+          from: ${{ secrets.ALERT_EMAIL_FROM || secrets.SMTP_USERNAME }}
+          body: |
+            RSS 自动更新任务失败。
+
+            仓库: ${{ github.repository }}
+            分支: ${{ github.ref_name }}
+            运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Send Feishu failure alert
+        if: failure() && secrets.FEISHU_WEBHOOK_URL != ''
+        env:
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          MSG="❌ RSS 自动更新失败\n仓库: ${{ github.repository }}\n分支: ${{ github.ref_name }}\n运行: ${RUN_URL}"
+          PAYLOAD=$(printf '{"msg_type":"text","content":{"text":"%s"}}' "$MSG")
+          curl -sS -X POST "$FEISHU_WEBHOOK_URL" -H "Content-Type: application/json" -d "$PAYLOAD"
