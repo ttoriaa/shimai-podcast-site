@@ -110,8 +110,23 @@ jobs:
       - name: No changes to commit
         if: steps.check_changes.outputs.changed == 'false'
         run: echo "✅ episodes.json 无更新"
+      - name: Resolve alert channels
+        id: alert_config
+        if: always()
+        run: |
+          if [ -n "${{ secrets.SMTP_SERVER }}" ] && [ -n "${{ secrets.ALERT_EMAIL_TO }}" ]; then
+            echo "email_enabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "email_enabled=false" >> $GITHUB_OUTPUT
+          fi
+          if [ -n "${{ secrets.FEISHU_WEBHOOK_URL }}" ]; then
+            echo "feishu_enabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "feishu_enabled=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Send failure email alert
-        if: failure() && secrets.SMTP_SERVER != '' && secrets.ALERT_EMAIL_TO != ''
+        if: failure() && steps.alert_config.outputs.email_enabled == 'true'
         uses: dawidd6/action-send-mail@v6
         with:
           server_address: ${{ secrets.SMTP_SERVER }}
@@ -129,7 +144,7 @@ jobs:
             运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Send Feishu failure alert
-        if: failure() && secrets.FEISHU_WEBHOOK_URL != ''
+        if: failure() && steps.alert_config.outputs.feishu_enabled == 'true'
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
         run: |
