@@ -72,11 +72,11 @@
     const root = document.createElement("div");
     root.className = "assistant-widget";
     root.innerHTML = [
-      '<button type="button" class="assistant-widget-launcher" aria-label="打开 AI Assistant Jackie">AI Assistant Jackie</button>',
-      '<section class="assistant-widget-panel" aria-label="AI Assistant Jackie 聊天窗口">',
+      '<button type="button" class="assistant-widget-launcher" aria-label="打开 问问Jackie">问问Jackie</button>',
+      '<section class="assistant-widget-panel" aria-label="问问Jackie 聊天窗口">',
       '  <header class="assistant-widget-header">',
       '    <div>',
-      '      <strong>AI Assistant Jackie</strong>',
+      '      <strong>问问Jackie</strong>',
       '      <p>当前：' + PAGE_CONTEXT + '</p>',
       "    </div>",
       '    <div class="assistant-widget-actions">',
@@ -91,7 +91,7 @@
       '      <button type="button" class="assistant-quick-btn">最近在聊什么</button>',
       "    </div>",
       '    <div class="assistant-widget-messages">',
-      '      <div class="assistant-message">你好，我是 AI Assistant Jackie。你可以问我当前页面相关问题。</div>',
+      '      <div class="assistant-message">Jackie是我的小猫，我不在家，他会回答你的。</div>',
       "    </div>",
       '    <form class="assistant-widget-form">',
       '      <textarea rows="3" placeholder="例如：结合当前页面，给我 3 个深一点的话题" required></textarea>',
