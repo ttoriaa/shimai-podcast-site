@@ -9,13 +9,19 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="#home">时髦小姨</a>
-      <nav class="site-nav" aria-label="主导航">
-        <a href="index.html#home">首页</a>
-        <a href="episodes.html">节目</a>
-        <a href="about.html">主持人</a>
-        <a href="mailto:vvickey.lee@gmail.com">联系</a>
-      </nav>
+      <a class="brand" id="brandText" data-i18n-href="index.html#home" href="#home">时髦小姨</a>
+      <div class="header-tools">
+        <nav class="site-nav" aria-label="主导航">
+          <a id="navHomeText" data-i18n-href="index.html#home" href="index.html#home">首页</a>
+          <a id="navEpisodesText" data-i18n-href="episodes.html" href="episodes.html">节目</a>
+          <a id="navAboutText" data-i18n-href="about.html" href="about.html">主持人</a>
+          <a id="navContactText" href="mailto:vvickey.lee@gmail.com">联系</a>
+        </nav>
+        <div class="lang-switch" role="group" aria-label="Language Switch">
+          <a class="lang-btn" data-lang="zh" href="index.html?lang=zh#home">中文</a>
+          <a class="lang-btn" data-lang="en" href="index.html?lang=en#home">EN</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -23,12 +29,12 @@
     <section class="hero" id="home">
       <div class="container hero-grid">
         <div class="hero-content">
-          <span class="eyebrow">新一季上线</span>
-          <h1>时髦小姨：熵增世界做熵减</h1>
-          <p>是 00 后初入职场的时髦小姨，也在狠狠经历奥德赛：在巴厘岛和小猴斗智斗勇、在罗马听海鸥的声音寻找古迹与现代的链接、在波伏娃幕前沉思、在加州当过 homeless、在夏威夷种地做园艺，以及各种待解锁形态……</p>
+          <span class="eyebrow" id="heroEyebrowText">新一季上线</span>
+          <h1 id="heroTitleText">时髦小姨：熵增世界做熵减</h1>
+          <p id="heroDescText">是 00 后初入职场的时髦小姨，也在狠狠经历奥德赛：在巴厘岛和小猴斗智斗勇、在罗马听海鸥的声音寻找古迹与现代的链接、在波伏娃幕前沉思、在加州当过 homeless、在夏威夷种地做园艺，以及各种待解锁形态……</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="episodes.html">立即收听</a>
-            <a class="btn btn-secondary" href="about.html">认识小姨</a>
+            <a class="btn btn-primary" id="heroPrimaryBtnText" data-i18n-href="episodes.html" href="episodes.html">立即收听</a>
+            <a class="btn btn-secondary" id="heroSecondaryBtnText" data-i18n-href="about.html" href="about.html">认识小姨</a>
           </div>
         </div>
         <div class="hero-media">
@@ -44,15 +50,15 @@
     <section class="section section-light" id="episodes">
       <div class="container">
         <div class="section-header">
-          <span class="eyebrow">热门节目</span>
-          <h2>时髦小姨的精选播客</h2>
-          <p>每一集都有一句你会记住的日常提醒。跟着小姨，从听完到行动，都升级一点。</p>
+          <span class="eyebrow" id="featuredEyebrowText">热门节目</span>
+          <h2 id="featuredTitleText">时髦小姨的精选播客</h2>
+          <p id="featuredDescText">每一集都有一句你会记住的日常提醒。跟着小姨，从听完到行动，都升级一点。</p>
         </div>
         <div class="episode-filters" id="episodeFilters">
-          <button class="filter-btn active" data-category="all">全部</button>
-          <button class="filter-btn" data-category="个人成长|碎碎念">个人成长|碎碎念</button>
-          <button class="filter-btn" data-category="何以丰荣|城市切片">何以丰荣|城市切片</button>
-          <button class="filter-btn" data-category="对谈Talk">对谈Talk</button>
+          <button class="filter-btn active" data-category="all" id="filterAllText">全部</button>
+          <button class="filter-btn" data-category="个人成长|碎碎念" id="filterGrowthText">个人成长|碎碎念</button>
+          <button class="filter-btn" data-category="何以丰荣|城市切片" id="filterCityText">何以丰荣|城市切片</button>
+          <button class="filter-btn" data-category="对谈Talk" id="filterTalkText">对谈Talk</button>
         </div>
         <div class="episode-grid" id="episodeGrid"></div>
       </div>
@@ -62,15 +68,15 @@
       <div class="container about-grid">
         <div class="about-media"></div>
         <div class="about-copy">
-          <span class="eyebrow">主持人介绍</span>
-          <h2>时髦小姨｜李好烦</h2>
-          <p>在熵增世界做熵减。是初入职场的时髦小姨，也在狠狠经历奥德赛：在巴厘岛和小猴斗智斗勇、在罗马听海鸥寻找古迹与现代连接、在夏威夷种地做园艺、在加州做 homeless，在巴黎坐在波伏娃前沉思，以及各种待解锁形态。</p>
+          <span class="eyebrow" id="hostEyebrowText">主持人介绍</span>
+          <h2 id="hostTitleText">时髦小姨｜李好烦</h2>
+          <p id="hostDescText">在熵增世界做熵减。是初入职场的时髦小姨，也在狠狠经历奥德赛：在巴厘岛和小猴斗智斗勇、在罗马听海鸥寻找古迹与现代连接、在夏威夷种地做园艺、在加州做 homeless，在巴黎坐在波伏娃前沉思，以及各种待解锁形态。</p>
           <ul class="about-list">
-            <li>女性主义｜一间属于自己的房间、波伏娃、上野千鹤子、伍尔夫...</li>
-            <li>何以丰荣｜城市切片、罗马在停留、巴黎在流动...</li>
-            <li>个人成长｜熵增世界做熵减...</li>
+            <li id="hostBullet1Text">女性主义｜一间属于自己的房间、波伏娃、上野千鹤子、伍尔夫...</li>
+            <li id="hostBullet2Text">何以丰荣｜城市切片、罗马在停留、巴黎在流动...</li>
+            <li id="hostBullet3Text">个人成长｜熵增世界做熵减...</li>
           </ul>
-          <div class="about-note">“在熵增世界做熵减。”</div>
+          <div class="about-note" id="hostNoteText">“在熵增世界做熵减。”</div>
         </div>
       </div>
     </section>
@@ -78,38 +84,38 @@
     <section class="section section-cta">
       <div class="container cta-card">
         <div>
-          <h2>订阅小姨的每一集</h2>
-          <p>连载内容会优先推送给你：节目洞察、选题灵感、城市叙事与自我整理。</p>
+          <h2 id="ctaTitleText">订阅小姨的每一集</h2>
+          <p id="ctaDescText">连载内容会优先推送给你：节目洞察、选题灵感、城市叙事与自我整理。</p>
         </div>
-        <a class="btn btn-primary" href="https://www.xiaoyuzhoufm.com/podcast/677df5c121f2ffde67508243" target="_blank" rel="noopener noreferrer">立即订阅</a>
+        <a class="btn btn-primary" id="ctaBtnText" href="https://www.xiaoyuzhoufm.com/podcast/677df5c121f2ffde67508243" target="_blank" rel="noopener noreferrer">立即订阅</a>
       </div>
     </section>
 
     <section class="section section-light" id="contact">
       <div class="container contact-grid">
         <div>
-          <span class="eyebrow">联系我们</span>
-          <h2>有话想说？欢迎来信</h2>
-          <p>如果你想推荐话题、分享听后感，或者想和小姨一起做一集特别专辑，发邮件或扫码关注小姨社交。</p>
+          <span class="eyebrow" id="contactEyebrowText">联系我们</span>
+          <h2 id="contactTitleText">有话想说？欢迎来信</h2>
+          <p id="contactDescText">如果你想推荐话题、分享听后感，或者想和小姨一起做一集特别专辑，发邮件或扫码关注小姨社交。</p>
           <div class="contact-details">
-            <p><strong>邮箱：</strong>vvickey.lee@gmail.com</p>
-            <p><strong>Instagram：</strong>@vikki.7ee</p>
+            <p><strong id="emailLabelText">邮箱：</strong>vvickey.lee@gmail.com</p>
+            <p><strong id="instagramLabelText">Instagram：</strong>@vikki.7ee</p>
           </div>
         </div>
         <form class="contact-form" id="contactForm">
           <label>
-            你的名字
-            <input type="text" name="name" placeholder="E.G. Jackie..." required />
+            <span id="nameLabelText">你的名字</span>
+            <input type="text" name="name" id="nameInput" placeholder="E.G. Jackie..." required />
           </label>
           <label>
-            你的邮件
-            <input type="email" name="email" placeholder="example@mail.com" required />
+            <span id="emailInputLabelText">你的邮件</span>
+            <input type="email" name="email" id="emailInput" placeholder="example@mail.com" required />
           </label>
           <label>
-            想聊的话题
-            <textarea name="message" rows="4" placeholder="我想聊节目内容、选题灵感或城市叙事..." required></textarea>
+            <span id="topicLabelText">想聊的话题</span>
+            <textarea name="message" id="messageInput" rows="4" placeholder="我想聊节目内容、选题灵感或城市叙事..." required></textarea>
           </label>
-          <button class="btn btn-primary" type="submit">发送消息</button>
+          <button class="btn btn-primary" id="contactSubmitText" type="submit">发送消息</button>
           <p class="form-note" id="formNote"></p>
         </form>
       </div>
@@ -118,18 +124,18 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>© 2026 时髦小姨 Podcast · 熵增世界做熵减</p>
+      <p id="footerText">© 2026 时髦小姨 Podcast · 熵增世界做熵减</p>
     </div>
   </footer>
 
   <div class="modal" id="previewModal" aria-hidden="true">
     <div class="modal-content">
       <button class="modal-close" id="modalCloseBtn" aria-label="关闭预览">×</button>
-      <h3>最新一期预览</h3>
-      <p>小姨带你快速听一段节目预览，9分钟轻松入门。</p>
+      <h3 id="modalTitleText">最新一期预览</h3>
+      <p id="modalDescText">小姨带你快速听一段节目预览，9分钟轻松入门。</p>
       <audio controls id="previewAudio">
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
-        你的浏览器不支持音频播放。
+        <span id="audioFallbackText">你的浏览器不支持音频播放。</span>
       </audio>
     </div>
   </div>
@@ -138,6 +144,7 @@
     window.__API_BASE__ = 'https://shimai-podcast-site.onrender.com';
     window.__ASSISTANT_CONTEXT__ = '首页';
   </script>
+  <script src="i18n.js"></script>
   <script src="script.js"></script>
   <script src="assistant-widget.js"></script>
 </body>

@@ -9,13 +9,19 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="index.html#home">时髦小姨</a>
-      <nav class="site-nav" aria-label="主导航">
-        <a href="index.html#home">首页</a>
-        <a href="episodes.html">节目</a>
-        <a href="about.html">主持人</a>
-        <a href="mailto:vvickey.lee@gmail.com">联系</a>
-      </nav>
+      <a class="brand" id="brandText" data-i18n-href="index.html#home" href="index.html#home">时髦小姨</a>
+      <div class="header-tools">
+        <nav class="site-nav" aria-label="主导航">
+          <a id="navHomeText" data-i18n-href="index.html#home" href="index.html#home">首页</a>
+          <a id="navEpisodesText" data-i18n-href="episodes.html" href="episodes.html">节目</a>
+          <a id="navAboutText" data-i18n-href="about.html" href="about.html">主持人</a>
+          <a id="navContactText" href="mailto:vvickey.lee@gmail.com">联系</a>
+        </nav>
+        <div class="lang-switch" role="group" aria-label="Language Switch">
+          <a class="lang-btn" data-lang="zh" href="about.html?lang=zh">中文</a>
+          <a class="lang-btn" data-lang="en" href="about.html?lang=en">EN</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -26,21 +32,21 @@
           <img src="images/about-1.jpg" alt="Vickie" style="width:100%; height:auto; object-fit:cover; border-radius:8px;" />
         </div>
         <div class="about-copy">
-          <span class="eyebrow">主持人</span>
-          <h2>时髦小姨｜李好烦</h2>
-          <p>在熵增世界做熵减。是初入职场的时髦小姨，也在狠狠经历奥德赛：在巴厘岛和小猴斗智斗勇、在罗马听海鸥寻找古迹与现代连接、在夏威夷种地做园艺、在加州做 homeless，在巴黎坐在波伏娃前沉思，以及各种待解锁形态。</p>
+          <span class="eyebrow" id="aboutEyebrowText">主持人</span>
+          <h2 id="aboutTitleText">时髦小姨｜李好烦</h2>
+          <p id="aboutDescText">在熵增世界做熵减。是初入职场的时髦小姨，也在狠狠经历奥德赛：在巴厘岛和小猴斗智斗勇、在罗马听海鸥寻找古迹与现代连接、在夏威夷种地做园艺、在加州做 homeless，在巴黎坐在波伏娃前沉思，以及各种待解锁形态。</p>
 
-          <h3>节目特色</h3>
+          <h3 id="aboutFeatureTitleText">节目特色</h3>
           <ul class="about-list">
-            <li>女性主义｜一间属于自己的房间、波伏娃、上野千鹤子、伍尔夫...</li>
-            <li>何以丰荣｜城市切片、罗马在停留、巴黎在流动...</li>
-            <li>个人成长｜熵增世界做熵减...</li>
+            <li id="aboutBullet1Text">女性主义｜一间属于自己的房间、波伏娃、上野千鹤子、伍尔夫...</li>
+            <li id="aboutBullet2Text">何以丰荣｜城市切片、罗马在停留、巴黎在流动...</li>
+            <li id="aboutBullet3Text">个人成长｜熵增世界做熵减...</li>
           </ul>
 
-          <h3>邀约与合作</h3>
-          <p>欢迎品牌邀约、听众来信或共同策划特别专辑。联系邮箱：vvickey.lee@gmail.com</p>
-          <p>更多信息请见：<a href="https://www.linkedin.com/in/vicky-li-0213ttoriaa/" target="_blank" rel="noopener noreferrer">Vickie LI · LinkedIn</a></p>
-          <p>英文简历页面：<a href="vickie_resume_profile_en.html">View Resume Profile (EN)</a></p>
+          <h3 id="aboutCoopTitleText">邀约与合作</h3>
+          <p id="aboutCoopDescText">欢迎品牌邀约、听众来信或共同策划特别专辑。联系邮箱：vvickey.lee@gmail.com</p>
+          <p><span id="aboutMoreInfoText">更多信息请见：</span><a id="aboutLinkedInText" href="https://www.linkedin.com/in/vicky-li-0213ttoriaa/" target="_blank" rel="noopener noreferrer">Vickie LI · LinkedIn</a></p>
+          <p><span id="aboutResumeLabelText">英文简历页面：</span><a id="aboutResumeLinkText" href="vickie_resume_profile_en.html">View Resume Profile (EN)</a></p>
         </div>
       </div>
     </section>
@@ -48,7 +54,7 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>© 2026 时髦小姨 Podcast</p>
+      <p id="footerText">© 2026 时髦小姨 Podcast</p>
     </div>
   </footer>
 
@@ -56,6 +62,8 @@
     window.__API_BASE__ = 'https://shimai-podcast-site.onrender.com';
     window.__ASSISTANT_CONTEXT__ = '主持人页';
   </script>
+  <script src="i18n.js"></script>
+  <script src="about.js"></script>
   <script src="assistant-widget.js"></script>
 </body>
 </html>

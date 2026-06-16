@@ -9,13 +9,19 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="index.html#home">时髦小姨</a>
-      <nav class="site-nav" aria-label="主导航">
-        <a href="index.html#home">首页</a>
-        <a href="episodes.html">节目</a>
-        <a href="about.html">主持人</a>
-        <a href="mailto:vvickey.lee@gmail.com">联系</a>
-      </nav>
+      <a class="brand" id="brandText" data-i18n-href="index.html#home" href="index.html#home">时髦小姨</a>
+      <div class="header-tools">
+        <nav class="site-nav" aria-label="主导航">
+          <a id="navHomeText" data-i18n-href="index.html#home" href="index.html#home">首页</a>
+          <a id="navEpisodesText" data-i18n-href="episodes.html" href="episodes.html">节目</a>
+          <a id="navAboutText" data-i18n-href="about.html" href="about.html">主持人</a>
+          <a id="navContactText" href="mailto:vvickey.lee@gmail.com">联系</a>
+        </nav>
+        <div class="lang-switch" role="group" aria-label="Language Switch">
+          <a class="lang-btn" data-lang="zh" href="episodes.html?lang=zh">中文</a>
+          <a class="lang-btn" data-lang="en" href="episodes.html?lang=en">EN</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -23,16 +29,16 @@
     <section class="section section-light">
       <div class="container">
         <div class="section-header">
-          <span class="eyebrow">全部节目</span>
-          <h2>按主题浏览每一集</h2>
-          <p>点击任意一集进入单集页面，收听、收藏或分享给朋友。</p>
+          <span class="eyebrow" id="episodesEyebrowText">全部节目</span>
+          <h2 id="episodesTitleText">按主题浏览每一集</h2>
+          <p id="episodesDescText">点击任意一集进入单集页面，收听、收藏或分享给朋友。</p>
         </div>
 
         <div class="episode-filters" id="episodeFilters">
-          <button class="filter-btn active" data-category="all">全部</button>
-          <button class="filter-btn" data-category="个人成长|碎碎念">个人成长|碎碎念</button>
-          <button class="filter-btn" data-category="何以丰荣|城市切片">何以丰荣|城市切片</button>
-          <button class="filter-btn" data-category="对谈Talk">对谈Talk</button>
+          <button class="filter-btn active" data-category="all" id="filterAllText">全部</button>
+          <button class="filter-btn" data-category="个人成长|碎碎念" id="filterGrowthText">个人成长|碎碎念</button>
+          <button class="filter-btn" data-category="何以丰荣|城市切片" id="filterCityText">何以丰荣|城市切片</button>
+          <button class="filter-btn" data-category="对谈Talk" id="filterTalkText">对谈Talk</button>
         </div>
 
         <div class="episode-grid" id="episodeGrid"></div>
@@ -42,7 +48,7 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>© 2026 时髦小姨 Podcast</p>
+      <p id="footerText">© 2026 时髦小姨 Podcast</p>
     </div>
   </footer>
 
@@ -50,6 +56,7 @@
     window.__API_BASE__ = 'https://shimai-podcast-site.onrender.com';
     window.__ASSISTANT_CONTEXT__ = '节目页';
   </script>
+  <script src="i18n.js"></script>
   <script src="episodes.js"></script>
   <script src="assistant-widget.js"></script>
 </body>
