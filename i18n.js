@@ -40,7 +40,13 @@
 
   function withLang(url, targetLang) {
     const lang = targetLang || getLang();
-    const parsed = new URL(url, window.location.origin);
+    // Resolve against current page URL so relative links keep the repo subpath on GitHub Pages.
+    const parsed = new URL(url, window.location.href);
+
+    if (parsed.protocol === 'mailto:' || parsed.protocol === 'tel:') {
+      return url;
+    }
+
     parsed.searchParams.set('lang', lang);
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   }
