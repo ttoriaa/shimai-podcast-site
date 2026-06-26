@@ -7,6 +7,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const ASSISTANT_DEBUG = ['1', 'true', 'yes', 'on'].includes(String(process.env.ASSISTANT_DEBUG || '').toLowerCase());
+const STYLE_PROMPTS = {
+  warm: '语气温柔、共情、有陪伴感，避免说教。',
+  sharp: '语气犀利、观点鲜明、逻辑直接，但不攻击用户。',
+  academic: '语气学术化、结构清晰、概念定义准确，适度引用分析框架。'
+};
 
 function cleanEnv(value) {
   return String(value || '').trim().replace(/^['"]|['"]$/g, '');
@@ -168,6 +173,42 @@ function getLatestSummary() {
   return `最新一集是《${latest.title}》。\n\n从 RSS 文本提炼的核心内容：\n${text ? text.slice(0, 280) : '当前没有可用的正文/摘要。'}\n\n一句话建议：适合想要在规则与自我边界之间找到更稳内核的听众。`;
 }
 
+function getLatestShowNotes(style) {
+  const latest = getLatestEpisode();
+  if (!latest) {
+    return '当前没有可用节目，暂时无法生成 show notes。';
+  }
+
+  const text = getEpisodeText(latest);
+  const excerpt = text ? text.slice(0, 280) : '暂无可用正文摘要。';
+  const styleTag = style === 'sharp' ? '犀利' : style === 'academic' ? '学术' : '温柔';
+
+  return [
+    `# Show Notes | ${latest.title || '本期节目'}`,
+    '',
+    `- 风格：${styleTag}`,
+    `- 日期：${latest.date || '未知'}`,
+    `- 时长：${latest.duration || '未知'}`,
+    '',
+    '## 本期摘要',
+    excerpt,
+    '',
+    '## 关键词',
+    '- 主体性',
+    '- 关系边界',
+    '- 城市生活',
+    '',
+    '## 3 个核心观点',
+    '1. 复杂时代里，清晰表达是稀缺能力。',
+    '2. 关系中的自由来自边界感与自我稳定。',
+    '3. 生活选择不求标准答案，而求持续迭代。',
+    '',
+    '## 可延展讨论',
+    '- 如果把本期观点放进职场场景，会发生什么？',
+    '- 这些观点如何落地到一周行动计划？'
+  ].join('\n');
+}
+
 function getRssTextAnalysisAnswer() {
   const rssContext = buildRssContext(5);
   if (!rssContext.length) {
@@ -197,7 +238,19 @@ function getRssTextAnalysisAnswer() {
   return `我已根据 RSS 解析文本做了摘要提炼。\n\n高频主题词：${hot.length ? hot.join('、') : '（关键词不足）'}\n\n最近 3 集文本摘要：\n${lines}\n\n如果你愿意，我可以继续输出：\n1. 选题空白点\n2. 10 个可直接录制的新选题\n3. 每个选题的一分钟口播提纲`;
 }
 
-function localAssistantAnswer(query) {
+function normalizeStyle(style) {
+  const s = String(style || '').toLowerCase();
+  if (s === 'sharp' || s === 'academic' || s === 'warm') return s;
+  return 'warm';
+}
+
+function localAssistantAnswer(query, options = {}) {
+  const mode = String(options.mode || '').toLowerCase();
+  const style = normalizeStyle(options.style);
+  if (mode === 'show_notes') {
+    return getLatestShowNotes(style);
+  }
+
   const content = query.toLowerCase();
 
   if (content.includes('overview') || content.includes('整体') || content.includes('概览') || content.includes('风格')) {
@@ -219,16 +272,23 @@ function localAssistantAnswer(query) {
   return '我可以帮助你：\n- 给你一个时髦小姨播客的整体 overview\n- 提供 5 个新话题建议\n- 生成最新一集的总结\n- 基于 RSS 解析文本提取关键词和内容摘要\n\n你可以直接输入“解析一下 RSS 文本内容”或“给我一个整体 overview”。';
 }
 
-async function generateOpenAIAnswer(query) {
+async function generateOpenAIAnswer(query, options = {}) {
   if (!openaiClient) {
     return { answer: null, error: 'llm_client_not_initialized' };
   }
+
+  const style = normalizeStyle(options.style);
+  const mode = String(options.mode || '').toLowerCase();
 
   const rssContextText = buildRssContext(6)
     .map((item) => `《${item.title}》${item.date ? `(${item.date})` : ''}\n${item.excerpt}`)
     .join('\n\n');
 
-  const prompt = `你是“时髦小姨”播客的智能助手。用户问题：${query}\n\n请基于以下 RSS 解析文本给出简洁、中文、温暖但理性的回答。\n\n最近节目文本：\n${rssContextText}`;
+  const taskInstruction = mode === 'show_notes'
+    ? '请生成可直接发布的本期 show notes（含：标题、摘要、关键词、核心观点、延展讨论）。'
+    : '请基于以下 RSS 解析文本回答用户问题。';
+
+  const prompt = `你是“时髦小姨”播客的智能助手。用户问题：${query}\n\n${taskInstruction}\n\n最近节目文本：\n${rssContextText}`;
 
   try {
     const completion = await openaiClient.chat.completions.create({
@@ -236,7 +296,7 @@ async function generateOpenAIAnswer(query) {
       messages: [
         {
           role: 'system',
-          content: '你是一个温柔且思辨的播客助手，擅长给出总体 overview、主题建议、最新总结、RSS 文本提炼。'
+          content: `你是一个思辨型播客助手。${STYLE_PROMPTS[style] || STYLE_PROMPTS.warm} 你的输出必须是中文，信息密度高且可执行。`
         },
         { role: 'user', content: prompt }
       ],
@@ -258,27 +318,33 @@ async function generateOpenAIAnswer(query) {
 
 app.post('/api/assistant/query', async (req, res) => {
   const query = (req.body && req.body.query) ? String(req.body.query) : '';
+  const style = req.body && req.body.style ? String(req.body.style) : 'warm';
+  const mode = req.body && req.body.mode ? String(req.body.mode) : 'chat';
   if (!query) {
     return res.status(400).json({ error: '请提供 query 参数。' });
   }
 
   if (openaiClient) {
-    const llmResult = await generateOpenAIAnswer(query);
+    const llmResult = await generateOpenAIAnswer(query, { style, mode });
     if (llmResult.answer) {
       return res.json({
         answer: llmResult.answer,
         source: 'llm',
         provider: llmConfig.provider,
-        model: llmConfig.model
+        model: llmConfig.model,
+        style: normalizeStyle(style),
+        mode
       });
     }
 
     const fallbackPayload = {
-      answer: localAssistantAnswer(query),
+      answer: localAssistantAnswer(query, { style, mode }),
       source: 'local',
       provider: llmConfig.provider,
       model: llmConfig.model,
-      reason_code: classifyLlmError(llmResult.error)
+      reason_code: classifyLlmError(llmResult.error),
+      style: normalizeStyle(style),
+      mode
     };
     if (ASSISTANT_DEBUG && llmResult.error) {
       fallbackPayload.llm_error = llmResult.error;
@@ -291,10 +357,12 @@ app.post('/api/assistant/query', async (req, res) => {
   }
 
   return res.json({
-    answer: localAssistantAnswer(query),
+    answer: localAssistantAnswer(query, { style, mode }),
     source: 'local',
     provider: 'local',
-    model: 'local-demo'
+    model: 'local-demo',
+    style: normalizeStyle(style),
+    mode
   });
 });
 

@@ -2,6 +2,7 @@
   const API_BASE = window.__API_BASE__ || "https://shimai-podcast-site.onrender.com";
   const PAGE_CONTEXT = window.__ASSISTANT_CONTEXT__ || "当前页面";
   const STORAGE_KEY = "vickie_assistant_widget_state";
+  const STYLE_KEY = "vickie_assistant_style";
   const PRESET_QUERY_MAP = {
     "一个介绍": "给我一个整体 overview",
     "一些新话题": "帮我想新的播客话题",
@@ -24,6 +25,10 @@
       ".assistant-widget-quick{display:flex;flex-wrap:wrap;gap:8px;}",
       ".assistant-widget-quick .assistant-quick-btn{border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:8px 12px;border-radius:999px;cursor:pointer;}",
       ".assistant-widget-quick .assistant-quick-btn:hover{background:var(--accent,#2ca8b5);color:#fff;}",
+      ".assistant-widget-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}",
+      ".assistant-widget-tools select{border-radius:10px;border:1px solid rgba(44,168,181,.24);padding:7px 10px;background:#fff;color:#174e58;}",
+      ".assistant-widget-tools .assistant-show-notes{border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:7px 12px;border-radius:999px;cursor:pointer;font-weight:600;}",
+      ".assistant-widget-tools .assistant-show-notes:hover{background:var(--accent,#2ca8b5);color:#fff;}",
       ".assistant-widget-messages{min-height:180px;max-height:280px;overflow-y:auto;padding:12px;border-radius:16px;background:#fff;border:1px solid rgba(44,168,181,.14);}",
       ".assistant-widget-form{display:flex;flex-direction:column;gap:10px;}",
       ".assistant-widget-form textarea{width:100%;min-height:90px;border-radius:12px;border:1px solid rgba(44,168,181,.2);padding:10px 12px;resize:vertical;}",
@@ -92,6 +97,15 @@
       '      <button type="button" class="assistant-quick-btn">一些新话题</button>',
       '      <button type="button" class="assistant-quick-btn">最近在聊什么</button>',
       "    </div>",
+      '    <div class="assistant-widget-tools">',
+      '      <label for="assistant-style-select">风格</label>',
+      '      <select id="assistant-style-select" class="assistant-style-select" aria-label="回复风格">',
+      '        <option value="warm">温柔</option>',
+      '        <option value="sharp">犀利</option>',
+      '        <option value="academic">学术</option>',
+      '      </select>',
+      '      <button type="button" class="assistant-show-notes">生成本期 show notes</button>',
+      '    </div>',
       '    <p class="assistant-status" aria-live="polite">状态：<strong>等待提问</strong></p>',
       '    <div class="assistant-widget-messages">',
       '      <div class="assistant-message">Jackie是我的小猫，我不在家，他会回答你的。</div>',
@@ -119,7 +133,34 @@
     const messages = root.querySelector(".assistant-widget-messages");
     const statusNode = root.querySelector(".assistant-status");
     const quickButtons = root.querySelectorAll(".assistant-widget-quick .assistant-quick-btn");
+    const styleSelect = root.querySelector(".assistant-style-select");
+    const showNotesBtn = root.querySelector(".assistant-show-notes");
     const state = loadState();
+
+    function loadStyle() {
+      try {
+        const s = sessionStorage.getItem(STYLE_KEY);
+        if (s === "warm" || s === "sharp" || s === "academic") return s;
+      } catch (error) {
+        // ignore
+      }
+      return "warm";
+    }
+
+    function saveStyle(value) {
+      try {
+        sessionStorage.setItem(STYLE_KEY, value);
+      } catch (error) {
+        // ignore
+      }
+    }
+
+    if (styleSelect) {
+      styleSelect.value = loadStyle();
+      styleSelect.addEventListener("change", function () {
+        saveStyle(styleSelect.value || "warm");
+      });
+    }
 
     function setStatus(text) {
       if (!statusNode) return;
@@ -136,7 +177,7 @@
       launcher.style.display = state.closed ? "inline-flex" : "none";
     }
 
-    async function sendQuestion(rawQuestion, userDisplayQuestion) {
+    async function sendQuestion(rawQuestion, userDisplayQuestion, mode) {
       const question = String(rawQuestion || "").trim();
       if (!question) return;
 
@@ -152,10 +193,11 @@
 
       try {
         const contextualQuery = "[页面上下文: " + PAGE_CONTEXT + "] " + question;
+        const selectedStyle = styleSelect ? String(styleSelect.value || "warm") : "warm";
         const response = await fetch(API_BASE + "/api/assistant/query", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: contextualQuery })
+          body: JSON.stringify({ query: contextualQuery, style: selectedStyle, mode: mode || "chat" })
         });
         const payload = await response.json();
 
@@ -167,7 +209,8 @@
           if (source === "llm") {
             const provider = payload.provider ? String(payload.provider).toUpperCase() : "LLM";
             const model = payload.model ? String(payload.model) : "";
-            setStatus("LLM回答（" + provider + (model ? "/" + model : "") + "）");
+            const styleLabel = payload.style === "sharp" ? "犀利" : payload.style === "academic" ? "学术" : "温柔";
+            setStatus("LLM回答（" + provider + (model ? "/" + model : "") + " | " + styleLabel + "）");
           } else if (source === "local") {
             setStatus("本地兜底");
           } else {
@@ -209,7 +252,7 @@
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
-      sendQuestion(input.value);
+      sendQuestion(input.value, undefined, "chat");
     });
 
     quickButtons.forEach(function (button) {
@@ -217,9 +260,16 @@
         const preset = String(button.textContent || "").trim();
         const mappedQuery = mapPresetToQuery(preset);
         input.value = preset;
-        sendQuestion(mappedQuery, preset);
+        sendQuestion(mappedQuery, preset, "chat");
       });
     });
+
+    if (showNotesBtn) {
+      showNotesBtn.addEventListener("click", function () {
+        const notesPrompt = "请生成本期 show notes";
+        sendQuestion(notesPrompt, "生成本期 show notes", "show_notes");
+      });
+    }
 
     syncUI();
   }
