@@ -32,6 +32,8 @@
       ".assistant-widget .assistant-user{text-align:right;background:rgba(44,168,181,.12);}",
       ".assistant-widget .assistant-loading{font-style:italic;color:var(--muted,#6b95a0);}",
       ".assistant-widget .assistant-error{background:#ffe8e8;color:#9f2b2b;}",
+      ".assistant-widget .assistant-status{margin:0;padding:8px 10px;border-radius:10px;background:rgba(44,168,181,.08);color:var(--muted,#6b95a0);font-size:.82rem;line-height:1.4;}",
+      ".assistant-widget .assistant-status strong{color:var(--accent-dark,#1a7a86);}",
       ".assistant-widget.is-closed .assistant-widget-panel{display:none;}",
       ".assistant-widget:not(.is-closed) .assistant-widget-launcher{display:none;}",
       "@media (max-width:700px){.assistant-widget{right:10px;left:10px;bottom:10px;}.assistant-widget-panel{width:auto;}}"
@@ -90,6 +92,7 @@
       '      <button type="button" class="assistant-quick-btn">一些新话题</button>',
       '      <button type="button" class="assistant-quick-btn">最近在聊什么</button>',
       "    </div>",
+      '    <p class="assistant-status" aria-live="polite">状态：<strong>等待提问</strong></p>',
       '    <div class="assistant-widget-messages">',
       '      <div class="assistant-message">Jackie是我的小猫，我不在家，他会回答你的。</div>',
       "    </div>",
@@ -114,8 +117,14 @@
     const form = root.querySelector(".assistant-widget-form");
     const input = root.querySelector("textarea");
     const messages = root.querySelector(".assistant-widget-messages");
+    const statusNode = root.querySelector(".assistant-status");
     const quickButtons = root.querySelectorAll(".assistant-widget-quick .assistant-quick-btn");
     const state = loadState();
+
+    function setStatus(text) {
+      if (!statusNode) return;
+      statusNode.innerHTML = '状态：<strong>' + text + '</strong>';
+    }
 
     function syncUI() {
       root.classList.toggle("is-closed", !!state.closed);
@@ -139,6 +148,7 @@
       const loading = createMessage("正在为你整理答案...", "assistant-loading");
       messages.appendChild(loading);
       messages.scrollTop = messages.scrollHeight;
+      setStatus("正在请求...");
 
       try {
         const contextualQuery = "[页面上下文: " + PAGE_CONTEXT + "] " + question;
@@ -153,14 +163,27 @@
 
         if (response.ok && payload && payload.answer) {
           messages.appendChild(createMessage(payload.answer, "assistant"));
+          const source = String(payload.source || "").toLowerCase();
+          if (source === "llm") {
+            const provider = payload.provider ? String(payload.provider).toUpperCase() : "LLM";
+            const model = payload.model ? String(payload.model) : "";
+            setStatus("LLM回答（" + provider + (model ? "/" + model : "") + "）");
+          } else if (source === "local") {
+            setStatus("本地兜底");
+          } else {
+            setStatus("回答完成");
+          }
         } else if (payload && payload.error) {
           messages.appendChild(createMessage(payload.error, "assistant-error"));
+          setStatus("请求失败");
         } else {
           messages.appendChild(createMessage("抱歉，助手暂时无法响应，请稍后再试。", "assistant-error"));
+          setStatus("无可用回答");
         }
       } catch (error) {
         loading.remove();
         messages.appendChild(createMessage("网络请求失败，请稍后再试。", "assistant-error"));
+        setStatus("网络异常");
       }
 
       messages.scrollTop = messages.scrollHeight;
