@@ -3,6 +3,7 @@
   const PAGE_CONTEXT = window.__ASSISTANT_CONTEXT__ || "当前页面";
   const STORAGE_KEY = "vickie_assistant_widget_state";
   const STYLE_KEY = "vickie_assistant_style";
+  const LANG_KEY = "vickie_assistant_lang";
   const PRESET_QUERY_MAP = {
     "一个介绍": "给我一个整体 overview",
     "一些新话题": "帮我想新的播客话题",
@@ -27,8 +28,12 @@
       ".assistant-widget-controls .assistant-chip,.assistant-widget-controls .assistant-show-notes{height:34px;border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:0 11px;border-radius:999px;cursor:pointer;font-size:.84rem;font-weight:600;white-space:nowrap;}",
       ".assistant-widget-controls .assistant-chip:hover,.assistant-widget-controls .assistant-show-notes:hover{background:var(--accent,#2ca8b5);color:#fff;}",
       ".assistant-widget-status-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}",
+      ".assistant-widget-status-row .assistant-meta{display:flex;align-items:center;gap:8px;}",
       ".assistant-widget-status-row .assistant-style{display:flex;align-items:center;gap:6px;color:var(--muted,#6b95a0);font-size:.8rem;white-space:nowrap;}",
       ".assistant-widget-status-row .assistant-style-select{height:32px;border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:0 10px;border-radius:999px;cursor:pointer;font-size:.82rem;font-weight:600;min-width:72px;}",
+      ".assistant-widget-status-row .assistant-lang-switch{display:inline-flex;align-items:center;padding:2px;border:1px solid rgba(26,122,134,.2);border-radius:999px;background:#fff;}",
+      ".assistant-widget-status-row .assistant-lang-btn{height:28px;border:none;background:transparent;color:var(--muted,#6b95a0);padding:0 9px;border-radius:999px;cursor:pointer;font-size:.78rem;font-weight:700;}",
+      ".assistant-widget-status-row .assistant-lang-btn.is-active{background:var(--accent,#2ca8b5);color:#fff;}",
       ".assistant-widget-messages{min-height:120px;max-height:min(34vh,220px);overflow-y:auto;padding:10px;border-radius:14px;background:#fff;border:1px solid rgba(44,168,181,.14);}",
       ".assistant-widget-form{display:flex;flex-direction:column;gap:10px;}",
       ".assistant-widget-form textarea{width:100%;min-height:74px;border-radius:12px;border:1px solid rgba(44,168,181,.2);padding:10px 12px;resize:vertical;max-height:140px;}",
@@ -43,7 +48,7 @@
       ".assistant-widget .assistant-status strong{color:var(--accent-dark,#1a7a86);}",
       ".assistant-widget.is-closed .assistant-widget-panel{display:none;}",
       ".assistant-widget:not(.is-closed) .assistant-widget-launcher{display:none;}",
-      "@media (max-width:700px){.assistant-widget{right:10px;left:10px;bottom:10px;}.assistant-widget-panel{width:auto;max-height:min(76vh,620px);}.assistant-widget-body{gap:9px;padding:10px;}.assistant-widget-status-row{align-items:flex-start;}.assistant-widget-status-row .assistant-style{font-size:.78rem;}.assistant-widget-status-row .assistant-style-select{height:30px;min-width:68px;}.assistant-widget-messages{max-height:min(28vh,180px);}.assistant-widget-form textarea{min-height:64px;max-height:110px;}}"
+      "@media (max-width:700px){.assistant-widget{right:10px;left:10px;bottom:10px;}.assistant-widget-panel{width:auto;max-height:min(76vh,620px);}.assistant-widget-body{gap:9px;padding:10px;}.assistant-widget-status-row{align-items:flex-start;}.assistant-widget-status-row .assistant-meta{gap:6px;}.assistant-widget-status-row .assistant-style{font-size:.78rem;}.assistant-widget-status-row .assistant-style-select{height:30px;min-width:64px;}.assistant-widget-status-row .assistant-lang-btn{height:26px;padding:0 8px;}.assistant-widget-messages{max-height:min(28vh,180px);}.assistant-widget-form textarea{min-height:64px;max-height:110px;}}"
     ].join("");
     document.head.appendChild(style);
   }
@@ -132,14 +137,20 @@
       '    </div>',
       '    <div class="assistant-widget-status-row">',
       '      <p class="assistant-status" aria-live="polite">状态：<strong>等待提问</strong></p>',
-      '      <label class="assistant-style">',
-      '        风格',
-      '        <select id="assistant-style-select" class="assistant-style-select" aria-label="回复风格">',
-      '          <option value="warm">温柔</option>',
-      '          <option value="sharp">犀利</option>',
-      '          <option value="academic">学术</option>',
-      '        </select>',
-      '      </label>',
+      '      <div class="assistant-meta">',
+      '        <div class="assistant-lang-switch" role="group" aria-label="回答语言">',
+      '          <button type="button" class="assistant-lang-btn is-active" data-lang="zh">中</button>',
+      '          <button type="button" class="assistant-lang-btn" data-lang="en">EN</button>',
+      '        </div>',
+      '        <label class="assistant-style">',
+      '          风格',
+      '          <select id="assistant-style-select" class="assistant-style-select" aria-label="回复风格">',
+      '            <option value="warm">温柔</option>',
+      '            <option value="sharp">犀利</option>',
+      '            <option value="academic">学术</option>',
+      '          </select>',
+      '        </label>',
+      '      </div>',
       '    </div>',
       '    <div class="assistant-widget-messages">',
       '      <div class="assistant-message">想聊什么，直接点上面的快捷入口，或者自己输入问题。</div>',
@@ -168,6 +179,7 @@
     const statusNode = root.querySelector(".assistant-status");
     const quickButtons = root.querySelectorAll(".assistant-widget-controls .assistant-chip");
     const styleSelect = root.querySelector(".assistant-style-select");
+    const langButtons = root.querySelectorAll(".assistant-lang-btn");
     const showNotesBtn = root.querySelector(".assistant-show-notes");
     const state = loadState();
 
@@ -189,12 +201,49 @@
       }
     }
 
+    function loadLang() {
+      try {
+        const v = sessionStorage.getItem(LANG_KEY);
+        if (v === "zh" || v === "en") return v;
+      } catch (error) {
+        // ignore
+      }
+      return "zh";
+    }
+
+    function saveLang(value) {
+      try {
+        sessionStorage.setItem(LANG_KEY, value);
+      } catch (error) {
+        // ignore
+      }
+    }
+
+    let currentLang = loadLang();
+
+    function syncLangButtons() {
+      langButtons.forEach(function (btn) {
+        const isActive = String(btn.getAttribute("data-lang") || "") === currentLang;
+        btn.classList.toggle("is-active", isActive);
+      });
+    }
+
     if (styleSelect) {
       styleSelect.value = loadStyle();
       styleSelect.addEventListener("change", function () {
         saveStyle(styleSelect.value || "warm");
       });
     }
+
+    langButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const next = String(btn.getAttribute("data-lang") || "zh");
+        currentLang = next === "en" ? "en" : "zh";
+        saveLang(currentLang);
+        syncLangButtons();
+      });
+    });
+    syncLangButtons();
 
     function setStatus(text) {
       if (!statusNode) return;
@@ -226,7 +275,8 @@
       setStatus("正在请求...");
 
       try {
-        const contextualQuery = "[页面上下文: " + PAGE_CONTEXT + "] " + question;
+        const langHint = currentLang === "en" ? "Please answer in English." : "请使用中文回答。";
+        const contextualQuery = "[页面上下文: " + PAGE_CONTEXT + "][回答语言: " + (currentLang === "en" ? "English" : "Chinese") + "] " + question + "\n" + langHint;
         const selectedStyle = styleSelect ? String(styleSelect.value || "warm") : "warm";
         const response = await fetch(API_BASE + "/api/assistant/query", {
           method: "POST",
