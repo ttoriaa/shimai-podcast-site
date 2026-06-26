@@ -21,10 +21,19 @@ npm start
 # 然后在浏览器打开 http://localhost:3000
 ```
 
-如果你希望启用 OpenAI 模型，请先设置环境变量：
+如果你希望启用“问问Jackie”大模型能力，支持 GLM 优先、OpenAI 回退：
 
 ```bash
-export OPENAI_API_KEY=your_api_key_here
+export GLM_API_KEY=your_glm_key_here
+# 可选：显式指定 GLM 网关（默认已内置）
+export GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+
+# 兼容变量（可不配；若无 GLM 时会回退到 OPENAI）
+export OPENAI_API_KEY=your_openai_key_here
+export OPENAI_BASE_URL=https://api.openai.com/v1
+
+# 可选：模型名；GLM 默认 glm-4-flash，OpenAI 默认 gpt-4o-mini
+export GLM_MODEL=glm-4-flash
 npm start
 ```
 

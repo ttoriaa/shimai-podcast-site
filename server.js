@@ -6,6 +6,30 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+function cleanEnv(value) {
+  return String(value || '').trim().replace(/^['"]|['"]$/g, '');
+}
+
+function resolveLlmConfig() {
+  const glmApiKey = cleanEnv(process.env.GLM_API_KEY);
+  const openaiApiKey = cleanEnv(process.env.OPENAI_API_KEY);
+  const apiKey = glmApiKey || openaiApiKey;
+
+  const glmBaseUrl = cleanEnv(process.env.GLM_BASE_URL) || 'https://open.bigmodel.cn/api/paas/v4';
+  const baseUrl = cleanEnv(process.env.OPENAI_BASE_URL) || (glmApiKey ? glmBaseUrl : 'https://api.openai.com/v1');
+
+  const model = cleanEnv(process.env.OPENAI_MODEL)
+    || cleanEnv(process.env.GLM_MODEL)
+    || (glmApiKey ? 'glm-4-flash' : 'gpt-4o-mini');
+
+  return {
+    apiKey,
+    baseURL: baseUrl,
+    model,
+    provider: glmApiKey ? 'glm' : 'openai'
+  };
+}
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
@@ -20,10 +44,14 @@ try {
 }
 
 let openaiClient = null;
-if (process.env.OPENAI_API_KEY) {
+let llmConfig = resolveLlmConfig();
+if (llmConfig.apiKey) {
   try {
     const OpenAI = require('openai');
-    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    openaiClient = new OpenAI({
+      apiKey: llmConfig.apiKey,
+      baseURL: llmConfig.baseURL
+    });
   } catch (error) {
     console.warn('OpenAI 客户端初始化失败，将使用本地 demo 模式：', error.message);
   }
@@ -173,7 +201,7 @@ async function generateOpenAIAnswer(query) {
 
   try {
     const completion = await openaiClient.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: llmConfig.model,
       messages: [
         {
           role: 'system',
@@ -216,7 +244,12 @@ app.get('/api/assistant/rss-context', (req, res) => {
 });
 
 app.get('/api/assistant/health', (req, res) => {
-  res.json({ status: 'ok', mode: openaiClient ? 'openai' : 'local' });
+  res.json({
+    status: 'ok',
+    mode: openaiClient ? 'llm' : 'local',
+    provider: openaiClient ? llmConfig.provider : 'local',
+    model: openaiClient ? llmConfig.model : 'local-demo'
+  });
 });
 
 app.get('*', (req, res) => {
@@ -228,5 +261,6 @@ app.get('*', (req, res) => {
 
 app.listen(port, () => {
   console.log(`时髦小姨站点已启动： http://localhost:${port}`);
-  console.log(`助手模式：${openaiClient ? 'OpenAI' : '本地 demo'}。`);
+  const modeLabel = openaiClient ? `${llmConfig.provider.toUpperCase()} (${llmConfig.model})` : '本地 demo';
+  console.log(`助手模式：${modeLabel}。`);
 });
