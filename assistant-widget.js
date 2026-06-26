@@ -357,6 +357,7 @@
 
     if (styleSelect) {
       styleSelect.value = loadStyle();
+      styleSelect.setAttribute("aria-label", copy().styleAria);
       styleSelect.addEventListener("change", function () {
         saveStyle(styleSelect.value || "warm");
       });
