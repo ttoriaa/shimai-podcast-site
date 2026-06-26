@@ -8,6 +8,81 @@
     "一些新话题": "帮我想新的播客话题",
     "最近在聊什么": "总结最新一集内容"
   };
+  const UI_COPY = {
+    zh: {
+      intro: "Jackie是我的小猫，我不在家，他会回答你的。",
+      quickIntro: "一个介绍",
+      quickTopics: "一些新话题",
+      quickRecent: "最近在聊什么",
+      showNotes: "生成本期 show notes",
+      style: "风格",
+      styleWarm: "温柔",
+      styleSharp: "犀利",
+      styleAcademic: "学术",
+      statusPrefix: "状态：",
+      statusWaiting: "等待提问",
+      statusRequesting: "正在请求...",
+      statusDone: "回答完成",
+      statusLocal: "本地兜底",
+      statusFailed: "请求失败",
+      statusEmpty: "无可用回答",
+      statusNetwork: "网络异常",
+      loading: "正在为你整理答案...",
+      welcome: "想聊什么，直接点上面的快捷入口，或者自己输入问题。",
+      placeholder: "例如：结合当前页面，给我 3 个深一点的话题",
+      send: "发送",
+      copy: "复制到剪贴板",
+      copied: "已复制",
+      copyFail: "复制失败",
+      notesPrompt: "请生成本期 show notes",
+      notesDisplay: "生成本期 show notes",
+      langHint: "请使用中文回答。",
+      langLabel: "回答语言"
+    },
+    en: {
+      intro: "Jackie is my cat. When I'm away, he can answer you.",
+      quickIntro: "Quick intro",
+      quickTopics: "New topics",
+      quickRecent: "Recent highlights",
+      showNotes: "Generate show notes",
+      style: "Style",
+      styleWarm: "Warm",
+      styleSharp: "Sharp",
+      styleAcademic: "Academic",
+      statusPrefix: "Status: ",
+      statusWaiting: "Waiting for your question",
+      statusRequesting: "Requesting...",
+      statusDone: "Answer ready",
+      statusLocal: "Local fallback",
+      statusFailed: "Request failed",
+      statusEmpty: "No answer available",
+      statusNetwork: "Network error",
+      statusLlm: "LLM reply",
+      loading: "Drafting your answer...",
+      welcome: "Pick a quick starter above or type your own question.",
+      placeholder: "For example: Based on this page, give me 3 deeper topics",
+      send: "Send",
+      copy: "Copy",
+      copied: "Copied",
+      copyFail: "Copy failed",
+      notesPrompt: "Please generate show notes for this episode",
+      notesDisplay: "Generate show notes",
+      langHint: "Please answer in English.",
+      langLabel: "Response language"
+    }
+  };
+
+  function detectPageLang() {
+    try {
+      const urlLang = new URLSearchParams(window.location.search).get("lang");
+      if (urlLang === "en") return "en";
+      if (urlLang === "zh") return "zh";
+    } catch (error) {
+      // ignore parse failures
+    }
+    const htmlLang = String(document.documentElement.lang || "").toLowerCase();
+    return htmlLang.indexOf("en") === 0 ? "en" : "zh";
+  }
 
   function ensureStyles() {
     if (document.getElementById("assistant-widget-style")) return;
@@ -126,37 +201,37 @@
       '      <button type="button" class="assistant-widget-close" aria-label="关闭">x</button>',
       "    </div>",
       "  </header>",
-      '  <p class="assistant-widget-intro">Jackie是我的小猫，我不在家，他会回答你的。</p>',
+      '  <p class="assistant-widget-intro" data-copy="intro">Jackie是我的小猫，我不在家，他会回答你的。</p>',
       '  <div class="assistant-widget-body">',
       '    <div class="assistant-widget-controls">',
-      '      <button type="button" class="assistant-chip" data-query="一个介绍">一个介绍</button>',
-      '      <button type="button" class="assistant-chip" data-query="一些新话题">一些新话题</button>',
-      '      <button type="button" class="assistant-chip" data-query="最近在聊什么">最近在聊什么</button>',
-      '      <button type="button" class="assistant-show-notes">生成本期 show notes</button>',
+      '      <button type="button" class="assistant-chip" data-query="一个介绍" data-copy="quickIntro">一个介绍</button>',
+      '      <button type="button" class="assistant-chip" data-query="一些新话题" data-copy="quickTopics">一些新话题</button>',
+      '      <button type="button" class="assistant-chip" data-query="最近在聊什么" data-copy="quickRecent">最近在聊什么</button>',
+      '      <button type="button" class="assistant-show-notes" data-copy="showNotes">生成本期 show notes</button>',
       '    </div>',
       '    <div class="assistant-widget-status-row">',
       '      <p class="assistant-status" aria-live="polite">状态：<strong>等待提问</strong></p>',
       '      <div class="assistant-meta">',
-      '        <label class="assistant-style">',
+      '        <label class="assistant-style" data-copy="style">',
       '          风格',
       '          <select id="assistant-style-select" class="assistant-style-select" aria-label="回复风格">',
-      '            <option value="warm">温柔</option>',
-      '            <option value="sharp">犀利</option>',
-      '            <option value="academic">学术</option>',
+      '            <option value="warm" data-copy="styleWarm">温柔</option>',
+      '            <option value="sharp" data-copy="styleSharp">犀利</option>',
+      '            <option value="academic" data-copy="styleAcademic">学术</option>',
       '          </select>',
       '        </label>',
-      '        <div class="assistant-lang-switch" role="group" aria-label="回答语言">',
+      '        <div class="assistant-lang-switch" role="group" aria-label="回答语言" data-aria-copy="langLabel">',
       '          <button type="button" class="assistant-lang-btn is-active" data-lang="zh">中</button>',
       '          <button type="button" class="assistant-lang-btn" data-lang="en">EN</button>',
       '        </div>',
       '      </div>',
       '    </div>',
       '    <div class="assistant-widget-messages">',
-      '      <div class="assistant-message">想聊什么，直接点上面的快捷入口，或者自己输入问题。</div>',
+      '      <div class="assistant-message" data-copy="welcome">想聊什么，直接点上面的快捷入口，或者自己输入问题。</div>',
       "    </div>",
       '    <form class="assistant-widget-form">',
       '      <textarea rows="3" placeholder="例如：结合当前页面，给我 3 个深一点的话题" required></textarea>',
-      '      <button type="submit">发送</button>',
+      '      <button type="submit" data-copy="send">发送</button>',
       "    </form>",
       "  </div>",
       "</section>"
@@ -200,19 +275,45 @@
       }
     }
 
-    function detectPageLang() {
-      try {
-        const urlLang = new URLSearchParams(window.location.search).get("lang");
-        if (urlLang === "en") return "en";
-        if (urlLang === "zh") return "zh";
-      } catch (error) {
-        // ignore parse failures
-      }
-      const htmlLang = String(document.documentElement.lang || "").toLowerCase();
-      return htmlLang.indexOf("en") === 0 ? "en" : "zh";
+    let currentLang = detectPageLang();
+    let currentStatusText = "";
+
+    function copy() {
+      return UI_COPY[currentLang] || UI_COPY.zh;
     }
 
-    let currentLang = detectPageLang();
+    function updateStaticCopy() {
+      const dict = copy();
+      root.querySelectorAll("[data-copy]").forEach(function (node) {
+        const key = node.getAttribute("data-copy");
+        if (!key || !dict[key]) return;
+        if (node.tagName === "LABEL") {
+          const select = node.querySelector("select");
+          const first = node.childNodes[0];
+          if (first && first.nodeType === Node.TEXT_NODE) {
+            first.nodeValue = dict[key] + " ";
+          } else if (select) {
+            node.insertBefore(document.createTextNode(dict[key] + " "), select);
+          }
+          return;
+        }
+        if (node.tagName === "TEXTAREA") {
+          node.setAttribute("placeholder", dict[key]);
+          return;
+        }
+        node.textContent = dict[key];
+      });
+
+      root.querySelectorAll("[data-aria-copy]").forEach(function (node) {
+        const key = node.getAttribute("data-aria-copy");
+        if (key && dict[key]) {
+          node.setAttribute("aria-label", dict[key]);
+        }
+      });
+
+      const textarea = root.querySelector(".assistant-widget-form textarea");
+      if (textarea) textarea.setAttribute("placeholder", dict.placeholder);
+    }
 
     function syncLangButtons() {
       langButtons.forEach(function (btn) {
@@ -233,14 +334,20 @@
         const next = String(btn.getAttribute("data-lang") || "zh");
         currentLang = next === "en" ? "en" : "zh";
         syncLangButtons();
+        updateStaticCopy();
+        setStatus(currentStatusText || copy().statusWaiting);
       });
     });
     syncLangButtons();
+    updateStaticCopy();
 
     function setStatus(text) {
       if (!statusNode) return;
-      statusNode.innerHTML = '状态：<strong>' + text + '</strong>';
+      currentStatusText = text;
+      statusNode.innerHTML = copy().statusPrefix + '<strong>' + text + '</strong>';
     }
+
+    setStatus(copy().statusWaiting);
 
     function syncUI() {
       root.classList.toggle("is-closed", !!state.closed);
@@ -261,13 +368,13 @@
       messages.scrollTop = messages.scrollHeight;
       input.value = "";
 
-      const loading = createMessage("正在为你整理答案...", "assistant-loading");
+      const loading = createMessage(copy().loading, "assistant-loading");
       messages.appendChild(loading);
       messages.scrollTop = messages.scrollHeight;
-      setStatus("正在请求...");
+      setStatus(copy().statusRequesting);
 
       try {
-        const langHint = currentLang === "en" ? "Please answer in English." : "请使用中文回答。";
+        const langHint = copy().langHint;
         const contextualQuery = "[页面上下文: " + PAGE_CONTEXT + "][回答语言: " + (currentLang === "en" ? "English" : "Chinese") + "] " + question + "\n" + langHint;
         const selectedStyle = styleSelect ? String(styleSelect.value || "warm") : "warm";
         const response = await fetch(API_BASE + "/api/assistant/query", {
@@ -286,12 +393,12 @@
             const copyBtn = document.createElement("button");
             copyBtn.type = "button";
             copyBtn.className = "assistant-copy-btn";
-            copyBtn.textContent = "复制到剪贴板";
+            copyBtn.textContent = copy().copy;
             copyBtn.addEventListener("click", async function () {
               const ok = await copyTextToClipboard(payload.answer);
-              copyBtn.textContent = ok ? "已复制" : "复制失败";
+              copyBtn.textContent = ok ? copy().copied : copy().copyFail;
               setTimeout(function () {
-                copyBtn.textContent = "复制到剪贴板";
+                copyBtn.textContent = copy().copy;
               }, 1500);
             });
             assistantNode.appendChild(copyBtn);
@@ -301,24 +408,26 @@
           if (source === "llm") {
             const provider = payload.provider ? String(payload.provider).toUpperCase() : "LLM";
             const model = payload.model ? String(payload.model) : "";
-            const styleLabel = payload.style === "sharp" ? "犀利" : payload.style === "academic" ? "学术" : "温柔";
-            setStatus("LLM回答（" + provider + (model ? "/" + model : "") + " | " + styleLabel + "）");
+            const dict = copy();
+            const styleLabel = payload.style === "sharp" ? dict.styleSharp : payload.style === "academic" ? dict.styleAcademic : dict.styleWarm;
+            const llmPrefix = currentLang === "en" ? dict.statusLlm : "LLM回答";
+            setStatus(llmPrefix + "（" + provider + (model ? "/" + model : "") + " | " + styleLabel + "）");
           } else if (source === "local") {
-            setStatus("本地兜底");
+            setStatus(copy().statusLocal);
           } else {
-            setStatus("回答完成");
+            setStatus(copy().statusDone);
           }
         } else if (payload && payload.error) {
           messages.appendChild(createMessage(payload.error, "assistant-error"));
-          setStatus("请求失败");
+          setStatus(copy().statusFailed);
         } else {
-          messages.appendChild(createMessage("抱歉，助手暂时无法响应，请稍后再试。", "assistant-error"));
-          setStatus("无可用回答");
+          messages.appendChild(createMessage(currentLang === "en" ? "Sorry, the assistant is temporarily unavailable. Please try again later." : "抱歉，助手暂时无法响应，请稍后再试。", "assistant-error"));
+          setStatus(copy().statusEmpty);
         }
       } catch (error) {
         loading.remove();
-        messages.appendChild(createMessage("网络请求失败，请稍后再试。", "assistant-error"));
-        setStatus("网络异常");
+        messages.appendChild(createMessage(currentLang === "en" ? "Network request failed. Please try again later." : "网络请求失败，请稍后再试。", "assistant-error"));
+        setStatus(copy().statusNetwork);
       }
 
       messages.scrollTop = messages.scrollHeight;
@@ -349,17 +458,18 @@
 
     quickButtons.forEach(function (button) {
       button.addEventListener("click", function () {
-        const preset = String(button.getAttribute("data-query") || button.textContent || "").trim();
-        const mappedQuery = mapPresetToQuery(preset);
-        input.value = preset;
-        sendQuestion(mappedQuery, preset, "chat");
+        const presetKey = String(button.getAttribute("data-query") || "").trim();
+        const display = String(button.textContent || presetKey).trim();
+        const mappedQuery = mapPresetToQuery(presetKey || display);
+        input.value = display;
+        sendQuestion(mappedQuery, display, "chat");
       });
     });
 
     if (showNotesBtn) {
       showNotesBtn.addEventListener("click", function () {
-        const notesPrompt = "请生成本期 show notes";
-        sendQuestion(notesPrompt, "生成本期 show notes", "show_notes");
+        const notesPrompt = copy().notesPrompt;
+        sendQuestion(notesPrompt, copy().notesDisplay, "show_notes");
       });
     }
 
