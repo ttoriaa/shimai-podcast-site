@@ -3,7 +3,6 @@
   const PAGE_CONTEXT = window.__ASSISTANT_CONTEXT__ || "当前页面";
   const STORAGE_KEY = "vickie_assistant_widget_state";
   const STYLE_KEY = "vickie_assistant_style";
-  const LANG_KEY = "vickie_assistant_lang";
   const PRESET_QUERY_MAP = {
     "一个介绍": "给我一个整体 overview",
     "一些新话题": "帮我想新的播客话题",
@@ -28,7 +27,7 @@
       ".assistant-widget-controls .assistant-chip,.assistant-widget-controls .assistant-show-notes{height:34px;border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:0 11px;border-radius:999px;cursor:pointer;font-size:.84rem;font-weight:600;white-space:nowrap;}",
       ".assistant-widget-controls .assistant-chip:hover,.assistant-widget-controls .assistant-show-notes:hover{background:var(--accent,#2ca8b5);color:#fff;}",
       ".assistant-widget-status-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}",
-      ".assistant-widget-status-row .assistant-meta{display:flex;align-items:center;gap:8px;}",
+      ".assistant-widget-status-row .assistant-meta{display:flex;align-items:center;gap:8px;margin-left:auto;}",
       ".assistant-widget-status-row .assistant-style{display:flex;align-items:center;gap:6px;color:var(--muted,#6b95a0);font-size:.8rem;white-space:nowrap;}",
       ".assistant-widget-status-row .assistant-style-select{height:32px;border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:0 10px;border-radius:999px;cursor:pointer;font-size:.82rem;font-weight:600;min-width:72px;}",
       ".assistant-widget-status-row .assistant-lang-switch{display:inline-flex;align-items:center;padding:2px;border:1px solid rgba(26,122,134,.2);border-radius:999px;background:#fff;}",
@@ -138,10 +137,6 @@
       '    <div class="assistant-widget-status-row">',
       '      <p class="assistant-status" aria-live="polite">状态：<strong>等待提问</strong></p>',
       '      <div class="assistant-meta">',
-      '        <div class="assistant-lang-switch" role="group" aria-label="回答语言">',
-      '          <button type="button" class="assistant-lang-btn is-active" data-lang="zh">中</button>',
-      '          <button type="button" class="assistant-lang-btn" data-lang="en">EN</button>',
-      '        </div>',
       '        <label class="assistant-style">',
       '          风格',
       '          <select id="assistant-style-select" class="assistant-style-select" aria-label="回复风格">',
@@ -150,6 +145,10 @@
       '            <option value="academic">学术</option>',
       '          </select>',
       '        </label>',
+      '        <div class="assistant-lang-switch" role="group" aria-label="回答语言">',
+      '          <button type="button" class="assistant-lang-btn is-active" data-lang="zh">中</button>',
+      '          <button type="button" class="assistant-lang-btn" data-lang="en">EN</button>',
+      '        </div>',
       '      </div>',
       '    </div>',
       '    <div class="assistant-widget-messages">',
@@ -201,25 +200,19 @@
       }
     }
 
-    function loadLang() {
+    function detectPageLang() {
       try {
-        const v = sessionStorage.getItem(LANG_KEY);
-        if (v === "zh" || v === "en") return v;
+        const urlLang = new URLSearchParams(window.location.search).get("lang");
+        if (urlLang === "en") return "en";
+        if (urlLang === "zh") return "zh";
       } catch (error) {
-        // ignore
+        // ignore parse failures
       }
-      return "zh";
+      const htmlLang = String(document.documentElement.lang || "").toLowerCase();
+      return htmlLang.indexOf("en") === 0 ? "en" : "zh";
     }
 
-    function saveLang(value) {
-      try {
-        sessionStorage.setItem(LANG_KEY, value);
-      } catch (error) {
-        // ignore
-      }
-    }
-
-    let currentLang = loadLang();
+    let currentLang = detectPageLang();
 
     function syncLangButtons() {
       langButtons.forEach(function (btn) {
@@ -239,7 +232,6 @@
       btn.addEventListener("click", function () {
         const next = String(btn.getAttribute("data-lang") || "zh");
         currentLang = next === "en" ? "en" : "zh";
-        saveLang(currentLang);
         syncLangButtons();
       });
     });
