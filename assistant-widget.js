@@ -14,25 +14,23 @@
     const style = document.createElement("style");
     style.id = "assistant-widget-style";
     style.textContent = [
-      ".assistant-widget{position:fixed;right:22px;bottom:22px;z-index:60;font-family:inherit;}",
+      ".assistant-widget{position:fixed;right:18px;bottom:18px;z-index:60;font-family:inherit;}",
       ".assistant-widget-launcher{border:none;border-radius:999px;background:var(--accent-dark,#1a7a86);color:#fff;padding:12px 18px;font-weight:700;cursor:pointer;box-shadow:0 16px 30px rgba(26,122,134,.25);}",
-      ".assistant-widget-panel{width:min(420px,calc(100vw - 28px));border-radius:24px;background:linear-gradient(180deg,#fff 0%,#eaf6f8 100%);border:1px solid rgba(44,168,181,.25);box-shadow:0 20px 60px rgba(26,122,134,.08);overflow:hidden;}",
+      ".assistant-widget-panel{width:min(360px,calc(100vw - 30px));border-radius:20px;background:linear-gradient(180deg,#fff 0%,#eaf6f8 100%);border:1px solid rgba(44,168,181,.25);box-shadow:0 20px 60px rgba(26,122,134,.08);overflow:hidden;}",
       ".assistant-widget-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(44,168,181,.2);}",
       ".assistant-widget-header p{margin:4px 0 0;color:var(--muted,#6b95a0);font-size:.85rem;}",
+      ".assistant-widget-intro{margin:0;padding:10px 16px;color:var(--muted,#6b95a0);font-size:.84rem;line-height:1.5;border-bottom:1px solid rgba(44,168,181,.14);}",
       ".assistant-widget-actions{display:flex;gap:8px;}",
       ".assistant-widget-actions button{width:30px;height:30px;border-radius:999px;border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);cursor:pointer;}",
-      ".assistant-widget-body{padding:14px;display:flex;flex-direction:column;gap:12px;}",
-      ".assistant-widget-quick{display:flex;flex-wrap:wrap;gap:8px;}",
-      ".assistant-widget-quick .assistant-quick-btn{border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:8px 12px;border-radius:999px;cursor:pointer;}",
-      ".assistant-widget-quick .assistant-quick-btn:hover{background:var(--accent,#2ca8b5);color:#fff;}",
-      ".assistant-widget-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}",
-      ".assistant-widget-tools select{border-radius:10px;border:1px solid rgba(44,168,181,.24);padding:7px 10px;background:#fff;color:#174e58;}",
-      ".assistant-widget-tools .assistant-show-notes{border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:7px 12px;border-radius:999px;cursor:pointer;font-weight:600;}",
-      ".assistant-widget-tools .assistant-show-notes:hover{background:var(--accent,#2ca8b5);color:#fff;}",
-      ".assistant-widget-messages{min-height:180px;max-height:280px;overflow-y:auto;padding:12px;border-radius:16px;background:#fff;border:1px solid rgba(44,168,181,.14);}",
+      ".assistant-widget-body{padding:12px;display:flex;flex-direction:column;gap:10px;}",
+      ".assistant-widget-controls{display:flex;align-items:center;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin;}",
+      ".assistant-widget-controls .assistant-chip,.assistant-widget-controls .assistant-style-select,.assistant-widget-controls .assistant-show-notes{height:34px;border:1px solid rgba(26,122,134,.2);background:#fff;color:var(--accent-dark,#1a7a86);padding:0 11px;border-radius:999px;cursor:pointer;font-size:.84rem;font-weight:600;white-space:nowrap;}",
+      ".assistant-widget-controls .assistant-chip:hover,.assistant-widget-controls .assistant-show-notes:hover{background:var(--accent,#2ca8b5);color:#fff;}",
+      ".assistant-widget-controls .assistant-style-select{min-width:72px;padding-right:28px;}",
+      ".assistant-widget-messages{min-height:120px;max-height:min(34vh,220px);overflow-y:auto;padding:10px;border-radius:14px;background:#fff;border:1px solid rgba(44,168,181,.14);}",
       ".assistant-widget-form{display:flex;flex-direction:column;gap:10px;}",
-      ".assistant-widget-form textarea{width:100%;min-height:90px;border-radius:12px;border:1px solid rgba(44,168,181,.2);padding:10px 12px;resize:vertical;}",
-      ".assistant-widget-form button{align-self:flex-end;border:none;border-radius:999px;background:var(--accent,#2ca8b5);color:#fff;padding:10px 18px;font-weight:700;cursor:pointer;}",
+      ".assistant-widget-form textarea{width:100%;min-height:74px;border-radius:12px;border:1px solid rgba(44,168,181,.2);padding:10px 12px;resize:vertical;max-height:140px;}",
+      ".assistant-widget-form button{align-self:flex-end;border:none;border-radius:999px;background:var(--accent,#2ca8b5);color:#fff;padding:9px 16px;font-weight:700;cursor:pointer;}",
       ".assistant-widget .assistant-message{margin-bottom:10px;padding:12px;border-radius:12px;background:#f8ffff;line-height:1.55;}",
       ".assistant-widget .assistant-user{text-align:right;background:rgba(44,168,181,.12);}",
       ".assistant-widget .assistant-loading{font-style:italic;color:var(--muted,#6b95a0);}",
@@ -43,7 +41,7 @@
       ".assistant-widget .assistant-status strong{color:var(--accent-dark,#1a7a86);}",
       ".assistant-widget.is-closed .assistant-widget-panel{display:none;}",
       ".assistant-widget:not(.is-closed) .assistant-widget-launcher{display:none;}",
-      "@media (max-width:700px){.assistant-widget{right:10px;left:10px;bottom:10px;}.assistant-widget-panel{width:auto;}}"
+      "@media (max-width:700px){.assistant-widget{right:10px;left:10px;bottom:10px;}.assistant-widget-panel{width:auto;max-height:min(76vh,620px);}.assistant-widget-body{gap:9px;padding:10px;}.assistant-widget-messages{max-height:min(28vh,180px);}.assistant-widget-form textarea{min-height:64px;max-height:110px;}}"
     ].join("");
     document.head.appendChild(style);
   }
@@ -122,14 +120,12 @@
       '      <button type="button" class="assistant-widget-close" aria-label="关闭">x</button>',
       "    </div>",
       "  </header>",
+      '  <p class="assistant-widget-intro">Jackie是我的小猫，我不在家，他会回答你的。</p>',
       '  <div class="assistant-widget-body">',
-      '    <div class="assistant-widget-quick">',
-      '      <button type="button" class="assistant-quick-btn">一个介绍</button>',
-      '      <button type="button" class="assistant-quick-btn">一些新话题</button>',
-      '      <button type="button" class="assistant-quick-btn">最近在聊什么</button>',
-      "    </div>",
-      '    <div class="assistant-widget-tools">',
-      '      <label for="assistant-style-select">风格</label>',
+      '    <div class="assistant-widget-controls">',
+      '      <button type="button" class="assistant-chip" data-query="一个介绍">一个介绍</button>',
+      '      <button type="button" class="assistant-chip" data-query="一些新话题">一些新话题</button>',
+      '      <button type="button" class="assistant-chip" data-query="最近在聊什么">最近在聊什么</button>',
       '      <select id="assistant-style-select" class="assistant-style-select" aria-label="回复风格">',
       '        <option value="warm">温柔</option>',
       '        <option value="sharp">犀利</option>',
@@ -139,7 +135,7 @@
       '    </div>',
       '    <p class="assistant-status" aria-live="polite">状态：<strong>等待提问</strong></p>',
       '    <div class="assistant-widget-messages">',
-      '      <div class="assistant-message">Jackie是我的小猫，我不在家，他会回答你的。</div>',
+      '      <div class="assistant-message">想聊什么，直接点上面的快捷入口，或者自己输入问题。</div>',
       "    </div>",
       '    <form class="assistant-widget-form">',
       '      <textarea rows="3" placeholder="例如：结合当前页面，给我 3 个深一点的话题" required></textarea>',
@@ -163,7 +159,7 @@
     const input = root.querySelector("textarea");
     const messages = root.querySelector(".assistant-widget-messages");
     const statusNode = root.querySelector(".assistant-status");
-    const quickButtons = root.querySelectorAll(".assistant-widget-quick .assistant-quick-btn");
+    const quickButtons = root.querySelectorAll(".assistant-widget-controls .assistant-chip");
     const styleSelect = root.querySelector(".assistant-style-select");
     const showNotesBtn = root.querySelector(".assistant-show-notes");
     const state = loadState();
@@ -304,7 +300,7 @@
 
     quickButtons.forEach(function (button) {
       button.addEventListener("click", function () {
-        const preset = String(button.textContent || "").trim();
+        const preset = String(button.getAttribute("data-query") || button.textContent || "").trim();
         const mappedQuery = mapPresetToQuery(preset);
         input.value = preset;
         sendQuestion(mappedQuery, preset, "chat");
