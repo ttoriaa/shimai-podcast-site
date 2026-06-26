@@ -10,6 +10,15 @@
   };
   const UI_COPY = {
     zh: {
+      launcher: "问问Jackie",
+      title: "问问Jackie",
+      currentPrefix: "当前：",
+      windowLabel: "问问Jackie 聊天窗口",
+      ariaOpen: "打开",
+      ariaClose: "关闭",
+      ariaMinimize: "最小化",
+      ariaExpand: "展开",
+      styleAria: "回复风格",
       intro: "Jackie是我的小猫，我不在家，他会回答你的。",
       quickIntro: "一个介绍",
       quickTopics: "一些新话题",
@@ -27,6 +36,7 @@
       statusFailed: "请求失败",
       statusEmpty: "无可用回答",
       statusNetwork: "网络异常",
+      statusLlm: "LLM回答",
       loading: "正在为你整理答案...",
       welcome: "想聊什么，直接点上面的快捷入口，或者自己输入问题。",
       placeholder: "例如：结合当前页面，给我 3 个深一点的话题",
@@ -40,6 +50,15 @@
       langLabel: "回答语言"
     },
     en: {
+      launcher: "Ask Jackie",
+      title: "Ask Jackie",
+      currentPrefix: "Current: ",
+      windowLabel: "Ask Jackie chat window",
+      ariaOpen: "Open",
+      ariaClose: "Close",
+      ariaMinimize: "Minimize",
+      ariaExpand: "Expand",
+      styleAria: "Response style",
       intro: "Jackie is my cat. When I'm away, he can answer you.",
       quickIntro: "Quick intro",
       quickTopics: "New topics",
@@ -284,6 +303,18 @@
 
     function updateStaticCopy() {
       const dict = copy();
+      const launcherBtn = root.querySelector(".assistant-widget-launcher");
+      const panelNode = root.querySelector(".assistant-widget-panel");
+      const titleNode = root.querySelector(".assistant-widget-header strong");
+      const currentNode = root.querySelector(".assistant-widget-header p");
+      if (launcherBtn) {
+        launcherBtn.textContent = dict.launcher;
+        launcherBtn.setAttribute("aria-label", dict.ariaOpen + " " + dict.title);
+      }
+      if (panelNode) panelNode.setAttribute("aria-label", dict.windowLabel);
+      if (titleNode) titleNode.textContent = dict.title;
+      if (currentNode) currentNode.textContent = dict.currentPrefix + PAGE_CONTEXT;
+
       root.querySelectorAll("[data-copy]").forEach(function (node) {
         const key = node.getAttribute("data-copy");
         if (!key || !dict[key]) return;
@@ -313,6 +344,8 @@
 
       const textarea = root.querySelector(".assistant-widget-form textarea");
       if (textarea) textarea.setAttribute("placeholder", dict.placeholder);
+      if (styleSelect) styleSelect.setAttribute("aria-label", dict.styleAria);
+      closeBtn.setAttribute("aria-label", dict.ariaClose);
     }
 
     function syncLangButtons() {
@@ -355,7 +388,7 @@
       panel.setAttribute("aria-hidden", state.closed ? "true" : "false");
       body.hidden = !!state.minimized;
       minBtn.textContent = state.minimized ? "+" : "-";
-      minBtn.setAttribute("aria-label", state.minimized ? "展开" : "最小化");
+      minBtn.setAttribute("aria-label", state.minimized ? copy().ariaExpand : copy().ariaMinimize);
       launcher.style.display = state.closed ? "inline-flex" : "none";
     }
 
@@ -410,7 +443,7 @@
             const model = payload.model ? String(payload.model) : "";
             const dict = copy();
             const styleLabel = payload.style === "sharp" ? dict.styleSharp : payload.style === "academic" ? dict.styleAcademic : dict.styleWarm;
-            const llmPrefix = currentLang === "en" ? dict.statusLlm : "LLM回答";
+            const llmPrefix = dict.statusLlm;
             setStatus(llmPrefix + "（" + provider + (model ? "/" + model : "") + " | " + styleLabel + "）");
           } else if (source === "local") {
             setStatus(copy().statusLocal);
@@ -418,7 +451,7 @@
             setStatus(copy().statusDone);
           }
         } else if (payload && payload.error) {
-          messages.appendChild(createMessage(payload.error, "assistant-error"));
+          messages.appendChild(createMessage(currentLang === "en" ? "Request failed. Please try again." : "请求失败，请稍后再试。", "assistant-error"));
           setStatus(copy().statusFailed);
         } else {
           messages.appendChild(createMessage(currentLang === "en" ? "Sorry, the assistant is temporarily unavailable. Please try again later." : "抱歉，助手暂时无法响应，请稍后再试。", "assistant-error"));
