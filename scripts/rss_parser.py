@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import pathlib
 import re
 import sys
@@ -19,6 +20,21 @@ from email.utils import parsedate_to_datetime
 RSS_URL = "https://feed.xyzfm.space/udvfuub6rpkp"
 OUTPUT_FILE = "episodes.json"
 CATEGORY_RULES_FILE = "category-rules.json"
+
+
+def _clean_env(value: str | None) -> str:
+    return str(value or "").strip().strip('"').strip("'")
+
+
+def _resolve_llm_env() -> tuple[str, str]:
+    glm_api_key = _clean_env(os.getenv("GLM_API_KEY"))
+    openai_api_key = _clean_env(os.getenv("OPENAI_API_KEY"))
+    api_key = glm_api_key or openai_api_key
+
+    configured_base_url = _clean_env(os.getenv("OPENAI_BASE_URL"))
+    glm_base_url = _clean_env(os.getenv("GLM_BASE_URL")) or "https://open.bigmodel.cn/api/paas/v4"
+    base_url = configured_base_url or (glm_base_url if glm_api_key else "https://api.openai.com/v1")
+    return api_key, base_url
 
 
 def decode_html_entities(text: str) -> str:
@@ -188,6 +204,10 @@ def main() -> int:
 
     cwd = pathlib.Path.cwd()
     output = cwd / args.output
+    api_key, base_url = _resolve_llm_env()
+    if api_key:
+        os.environ.setdefault("OPENAI_API_KEY", api_key)
+        os.environ.setdefault("OPENAI_BASE_URL", base_url)
 
     try:
         print("Fetching RSS feed...")

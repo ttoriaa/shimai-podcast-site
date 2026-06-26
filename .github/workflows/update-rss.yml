@@ -12,6 +12,10 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || secrets.GLM_API_KEY }}
+  OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL || vars.GLM_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4' }}
+  GLM_BASE_URL: ${{ vars.GLM_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4' }}
 
 jobs:
   update-rss:

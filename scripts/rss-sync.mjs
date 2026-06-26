@@ -53,6 +53,25 @@ function hasFilesRecursively(dirPath) {
   return false;
 }
 
+function cleanEnv(value) {
+  return String(value || "").trim().replace(/^['"]|['"]$/g, "");
+}
+
+function resolveLlmEnv() {
+  const glmApiKey = cleanEnv(process.env.GLM_API_KEY);
+  const openaiApiKey = cleanEnv(process.env.OPENAI_API_KEY);
+  const resolvedApiKey = glmApiKey || openaiApiKey;
+
+  const configuredBaseUrl = cleanEnv(process.env.OPENAI_BASE_URL);
+  const glmBaseUrl = cleanEnv(process.env.GLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4");
+  const resolvedBaseUrl = configuredBaseUrl || (glmApiKey ? glmBaseUrl : "https://api.openai.com/v1");
+
+  return {
+    apiKey: resolvedApiKey,
+    baseUrl: resolvedBaseUrl,
+  };
+}
+
 function validatePath(pathLike) {
   const fullPath = resolve(pathLike);
   if (!existsSync(fullPath)) {
@@ -82,6 +101,12 @@ async function main() {
   const stateFile = args["state-file"] || process.env.STATE_FILE || ".cache/rss_state.json";
   const changedPathsRaw = args["changed-paths"] || process.env.CHANGED_PATHS || "";
   const dryRun = toBool(args["dry-run"] || process.env.DRY_RUN, false);
+
+  const llmEnv = resolveLlmEnv();
+  if (llmEnv.apiKey) {
+    process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || llmEnv.apiKey;
+    process.env.OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || llmEnv.baseUrl;
+  }
 
   if (!rssUrl) {
     throw new Error("Missing RSS URL. Pass --rss-url or RSS_URL.");

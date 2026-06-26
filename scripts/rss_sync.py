@@ -25,6 +25,21 @@ import urllib.request
 from datetime import datetime, timezone
 
 
+def clean_env(value: str | None) -> str:
+    return str(value or "").strip().strip('"').strip("'")
+
+
+def resolve_llm_env() -> tuple[str, str]:
+    glm_api_key = clean_env(os.environ.get("GLM_API_KEY"))
+    openai_api_key = clean_env(os.environ.get("OPENAI_API_KEY"))
+    api_key = glm_api_key or openai_api_key
+
+    configured_base_url = clean_env(os.environ.get("OPENAI_BASE_URL"))
+    glm_base_url = clean_env(os.environ.get("GLM_BASE_URL")) or "https://open.bigmodel.cn/api/paas/v4"
+    base_url = configured_base_url or (glm_base_url if glm_api_key else "https://api.openai.com/v1")
+    return api_key, base_url
+
+
 def to_bool(value: str | None, default: bool = False) -> bool:
     if value is None or value == "":
         return default
@@ -91,6 +106,11 @@ def main() -> int:
     dry_run = to_bool(args.dry_run, False)
     auto_commit = to_bool(args.auto_commit, False)
     auto_push = to_bool(args.auto_push, False)
+
+    api_key, base_url = resolve_llm_env()
+    if api_key:
+        os.environ.setdefault("OPENAI_API_KEY", api_key)
+        os.environ.setdefault("OPENAI_BASE_URL", base_url)
 
     state_path = pathlib.Path(args.state_file).resolve()
     prev = load_json(state_path, {})

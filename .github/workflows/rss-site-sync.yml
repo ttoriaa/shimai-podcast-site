@@ -29,6 +29,10 @@ jobs:
       UPDATE_COMMAND: ${{ inputs.update_command || vars.PODCAST_UPDATE_COMMAND || 'python ./scripts/rss_parser.py' }}
       CHANGED_PATHS: ${{ inputs.changed_paths || vars.PODCAST_CHANGED_PATHS || 'episodes.json' }}
       STATE_FILE: .cache/rss_state.json
+      GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || secrets.GLM_API_KEY }}
+      OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL || vars.GLM_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4' }}
+      GLM_BASE_URL: ${{ vars.GLM_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
