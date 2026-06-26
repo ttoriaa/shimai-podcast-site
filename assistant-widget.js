@@ -37,6 +37,8 @@
       ".assistant-widget .assistant-user{text-align:right;background:rgba(44,168,181,.12);}",
       ".assistant-widget .assistant-loading{font-style:italic;color:var(--muted,#6b95a0);}",
       ".assistant-widget .assistant-error{background:#ffe8e8;color:#9f2b2b;}",
+      ".assistant-widget .assistant-copy-btn{display:inline-flex;align-items:center;gap:4px;margin-top:8px;border:1px solid rgba(26,122,134,.24);background:#fff;color:var(--accent-dark,#1a7a86);padding:4px 10px;border-radius:999px;font-size:.78rem;cursor:pointer;}",
+      ".assistant-widget .assistant-copy-btn:hover{background:rgba(44,168,181,.1);}",
       ".assistant-widget .assistant-status{margin:0;padding:8px 10px;border-radius:10px;background:rgba(44,168,181,.08);color:var(--muted,#6b95a0);font-size:.82rem;line-height:1.4;}",
       ".assistant-widget .assistant-status strong{color:var(--accent-dark,#1a7a86);}",
       ".assistant-widget.is-closed .assistant-widget-panel{display:none;}",
@@ -73,6 +75,35 @@
     node.className = "assistant-message " + (variant || "assistant");
     node.textContent = text;
     return node;
+  }
+
+  async function copyTextToClipboard(text) {
+    const content = String(text || "");
+    if (!content) return false;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(content);
+        return true;
+      } catch (error) {
+        // fallback below
+      }
+    }
+
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = content;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return copied;
+    } catch (error) {
+      return false;
+    }
   }
 
   function createWidget() {
@@ -204,7 +235,23 @@
         loading.remove();
 
         if (response.ok && payload && payload.answer) {
-          messages.appendChild(createMessage(payload.answer, "assistant"));
+          const assistantNode = createMessage(payload.answer, "assistant");
+          const modeName = String(payload.mode || "").toLowerCase();
+          if (modeName === "show_notes") {
+            const copyBtn = document.createElement("button");
+            copyBtn.type = "button";
+            copyBtn.className = "assistant-copy-btn";
+            copyBtn.textContent = "复制到剪贴板";
+            copyBtn.addEventListener("click", async function () {
+              const ok = await copyTextToClipboard(payload.answer);
+              copyBtn.textContent = ok ? "已复制" : "复制失败";
+              setTimeout(function () {
+                copyBtn.textContent = "复制到剪贴板";
+              }, 1500);
+            });
+            assistantNode.appendChild(copyBtn);
+          }
+          messages.appendChild(assistantNode);
           const source = String(payload.source || "").toLowerCase();
           if (source === "llm") {
             const provider = payload.provider ? String(payload.provider).toUpperCase() : "LLM";
