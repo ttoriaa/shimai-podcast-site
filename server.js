@@ -6,6 +6,8 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+const ASSISTANT_DEBUG = ['1', 'true', 'yes', 'on'].includes(String(process.env.ASSISTANT_DEBUG || '').toLowerCase());
+
 function cleanEnv(value) {
   return String(value || '').trim().replace(/^['"]|['"]$/g, '');
 }
@@ -190,7 +192,7 @@ function localAssistantAnswer(query) {
 
 async function generateOpenAIAnswer(query) {
   if (!openaiClient) {
-    return null;
+    return { answer: null, error: 'llm_client_not_initialized' };
   }
 
   const rssContextText = buildRssContext(6)
@@ -213,10 +215,15 @@ async function generateOpenAIAnswer(query) {
       max_tokens: 700
     });
 
-    return completion?.choices?.[0]?.message?.content?.trim() || null;
+    const answer = completion?.choices?.[0]?.message?.content?.trim() || null;
+    if (!answer) {
+      return { answer: null, error: 'empty_llm_response' };
+    }
+    return { answer, error: null };
   } catch (error) {
-    console.error('OpenAI 请求失败：', error);
-    return null;
+    const msg = error && error.message ? error.message : String(error);
+    console.error('OpenAI 请求失败：', msg);
+    return { answer: null, error: msg };
   }
 }
 
@@ -227,13 +234,34 @@ app.post('/api/assistant/query', async (req, res) => {
   }
 
   if (openaiClient) {
-    const answer = await generateOpenAIAnswer(query);
-    if (answer) {
-      return res.json({ answer });
+    const llmResult = await generateOpenAIAnswer(query);
+    if (llmResult.answer) {
+      return res.json({
+        answer: llmResult.answer,
+        source: 'llm',
+        provider: llmConfig.provider,
+        model: llmConfig.model
+      });
     }
+
+    const fallbackPayload = {
+      answer: localAssistantAnswer(query),
+      source: 'local',
+      provider: llmConfig.provider,
+      model: llmConfig.model
+    };
+    if (ASSISTANT_DEBUG && llmResult.error) {
+      fallbackPayload.llm_error = llmResult.error;
+    }
+    return res.json(fallbackPayload);
   }
 
-  return res.json({ answer: localAssistantAnswer(query) });
+  return res.json({
+    answer: localAssistantAnswer(query),
+    source: 'local',
+    provider: 'local',
+    model: 'local-demo'
+  });
 });
 
 app.get('/api/assistant/rss-context', (req, res) => {
