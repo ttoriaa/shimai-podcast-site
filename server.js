@@ -12,13 +12,25 @@ function cleanEnv(value) {
   return String(value || '').trim().replace(/^['"]|['"]$/g, '');
 }
 
+function normalizeBaseUrl(url) {
+  const raw = cleanEnv(url);
+  if (!raw) return '';
+  let out = raw.replace(/\/+$/, '');
+  // Guard against misconfigured endpoint paths pasted into base URL.
+  out = out.replace(/\/chat\/completions$/i, '');
+  out = out.replace(/\/v1\/chat\/completions$/i, '/v1');
+  out = out.replace(/\/api\/paas\/v4\/chat\/completions$/i, '/api/paas/v4');
+  return out;
+}
+
 function resolveLlmConfig() {
   const glmApiKey = cleanEnv(process.env.GLM_API_KEY);
   const openaiApiKey = cleanEnv(process.env.OPENAI_API_KEY);
   const apiKey = glmApiKey || openaiApiKey;
 
-  const glmBaseUrl = cleanEnv(process.env.GLM_BASE_URL) || 'https://open.bigmodel.cn/api/paas/v4';
-  const baseUrl = cleanEnv(process.env.OPENAI_BASE_URL) || (glmApiKey ? glmBaseUrl : 'https://api.openai.com/v1');
+  const glmBaseUrl = normalizeBaseUrl(process.env.GLM_BASE_URL) || 'https://open.bigmodel.cn/api/paas/v4';
+  const configuredOpenaiBaseUrl = normalizeBaseUrl(process.env.OPENAI_BASE_URL);
+  const baseUrl = configuredOpenaiBaseUrl || (glmApiKey ? glmBaseUrl : 'https://api.openai.com/v1');
 
   const model = cleanEnv(process.env.OPENAI_MODEL)
     || cleanEnv(process.env.GLM_MODEL)
@@ -28,8 +40,25 @@ function resolveLlmConfig() {
     apiKey,
     baseURL: baseUrl,
     model,
-    provider: glmApiKey ? 'glm' : 'openai'
+    provider: glmApiKey ? 'glm' : 'openai',
+    fromEnv: {
+      hasGlmKey: Boolean(glmApiKey),
+      hasOpenaiKey: Boolean(openaiApiKey),
+      glmBaseUrl,
+      openaiBaseUrl: configuredOpenaiBaseUrl
+    }
   };
+}
+
+function classifyLlmError(errorMessage) {
+  const msg = String(errorMessage || '').toLowerCase();
+  if (!msg) return 'unknown';
+  if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('invalid api key')) return 'auth_failed';
+  if (msg.includes('403') || msg.includes('forbidden') || msg.includes('permission')) return 'permission_denied';
+  if (msg.includes('429') || msg.includes('quota') || msg.includes('rate limit')) return 'quota_or_rate_limited';
+  if (msg.includes('404') || msg.includes('not_found') || msg.includes('not found')) return 'endpoint_or_model_not_found';
+  if (msg.includes('timeout') || msg.includes('timed out') || msg.includes('econnreset') || msg.includes('enotfound')) return 'network_or_timeout';
+  return 'unknown';
 }
 
 app.use(cors());
@@ -248,10 +277,15 @@ app.post('/api/assistant/query', async (req, res) => {
       answer: localAssistantAnswer(query),
       source: 'local',
       provider: llmConfig.provider,
-      model: llmConfig.model
+      model: llmConfig.model,
+      reason_code: classifyLlmError(llmResult.error)
     };
     if (ASSISTANT_DEBUG && llmResult.error) {
       fallbackPayload.llm_error = llmResult.error;
+      fallbackPayload.debug = {
+        base_url: llmConfig.baseURL,
+        env: llmConfig.fromEnv
+      };
     }
     return res.json(fallbackPayload);
   }
@@ -272,12 +306,19 @@ app.get('/api/assistant/rss-context', (req, res) => {
 });
 
 app.get('/api/assistant/health', (req, res) => {
-  res.json({
+  const payload = {
     status: 'ok',
     mode: openaiClient ? 'llm' : 'local',
     provider: openaiClient ? llmConfig.provider : 'local',
     model: openaiClient ? llmConfig.model : 'local-demo'
-  });
+  };
+  if (ASSISTANT_DEBUG) {
+    payload.debug = {
+      base_url: llmConfig.baseURL,
+      env: llmConfig.fromEnv
+    };
+  }
+  res.json(payload);
 });
 
 app.get('*', (req, res) => {
